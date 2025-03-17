@@ -138,7 +138,6 @@ int main(void){
     {
         /* Erase any disk and lines that were drawn in the last iteration */
         clear_screen();
-		drawBars();
 		draw(disks, KEY_ptr, SW_ptr);
 		
 
@@ -160,6 +159,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     //faster, but harder: erase only what you drew - 2 frames ago!
     //METHOD 2:
     //Erase the old location of boxes:
+		drawBars();
 
     //Draw each disk
     for (int index = 0; index < N; index++){
