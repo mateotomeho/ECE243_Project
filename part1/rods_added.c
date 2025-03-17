@@ -246,7 +246,7 @@ bool add_disk_column(struct disk_info disk, int direction){
     }
 
     //Start from the end and goes to the begin
-    for (int i = N-1 ; i > 0; i--){
+    for (int i = N-1 ; i >= 0; i--){
         //Check LEFT
         if(left){
             //Check if there is a smaller disk already here
