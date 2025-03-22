@@ -17,6 +17,7 @@ For the game complexity, make a hard mode with 4 disks
 #define KEY_BASE			0xFF200050
 #define TIMER_BASE			0xFF202000
 #define AUDIO_BASE			0xFF203040
+#define PS2_BASE			0xFF200100
 
 
 volatile int pixel_buffer_start; // global variable
@@ -61,12 +62,13 @@ void update_disk_position(struct disk_info disks[], int index);
 void direction_rods(struct disk_info disks[], int index, int direction);
 bool add_disk_column(struct disk_info disk, int direction);
 void delete_disk_column(struct disk_info disk);
+void read_keyboard(unsigned char *pressedKey);
 
 int main(void){
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
-    //volatile int *LEDR_ptr = (volatile int *) LEDR_BASE;
-    volatile int *KEY_ptr = (volatile int *) KEY_BASE;
-    volatile int *SW_ptr = (volatile int *) SW_BASE;
+    volatile int * ps2_ptr = (volatile int *) PS2_BASE;
+    volatile int * KEY_ptr = (volatile int *) KEY_BASE;
+    volatile int * SW_ptr = (volatile int *) SW_BASE;
 
 
     //Score element
@@ -173,10 +175,32 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         update_disk_position(disks, index);
     }
 
+    //Use the PS/2 Keyboard to control the disks 
+    unsigned char key_input = 0;
+    int bit_3210 = 0;
+    int SW_value = 0;
+
+    //The key_input from the keyboard
+    read_keyboard(&key_input);
+
+    if (key_input == 0x6B){ //Check if left arrow (go left)
+        bit_3210 = 0b0100;
+    } else if (key_input == 0x72){ //Check if down arrow (go center)
+        bit_3210 = 0b0010;
+    } else if (key_input == 0x74){ //Check if down arrow (go right)
+        bit_3210 = 0b0001;
+    }
+
+    if (bit_3210 != 0){
+        //Get which disks to move by having the SW
+        SW_value = (*SW_ptr) & 0b11; //Get the value of the first 2 SW
+        direction_rods(disks, SW_value, bit_3210);
+    }
+
+    /*
     //Movement control of a disk towards another rods 
     //Check the edge capture of KEY_PUSHBUTTON
     //KEY2 == LEFT // KEY1 == CENTER // KEY0 == RIGHT
-
     int edge_capture = 0;
     int bit_3210 = 0;
 
@@ -197,7 +221,24 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         SW_value = (*SW_ptr) & 0b11; //Get the value of the first 2 SW
         direction_rods(disks, SW_value, bit_3210);
     } 
+    */
+
+
 }
+
+void read_keyboard(unsigned char *pressedKey) {
+    volatile int *ps2_ptr = (int *) 0xFF200100; //Get the PS/2 data register
+
+    //while (1) {  //Loop until a valid key is received
+        int data = *ps2_ptr;  
+
+        if (data & 0x8000) {  //Check if RVALID (bit 15) is set
+            *pressedKey = data & 0xFF;  // Get data == lower 8 bits
+            return;
+        }
+    //}
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
