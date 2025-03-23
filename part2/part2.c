@@ -92,7 +92,11 @@ int main(void){
     disks[i].column = 0;
     }
 	
-
+    //Intialize the size
+    disks[0].size = 50;  // Small (Blue)
+    disks[1].size = 70;  // Medium (Green)
+    disks[2].size = 90;  // Large (Red)
+	
     //Intialize the location of the disks
     for (int i = 0; i < N; i++) {
         //Small at (30,10), Medium at (20,50), Large at (10,90)
@@ -106,10 +110,7 @@ int main(void){
 
 
 
-    //Intialize the size
-    disks[0].size = 50;  // Small (Blue)
-    disks[1].size = 70;  // Medium (Green)
-    disks[2].size = 90;  // Large (Red)
+
 
 
     //Initialize the colour
