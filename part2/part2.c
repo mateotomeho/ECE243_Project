@@ -66,7 +66,7 @@ void read_keyboard(unsigned char *pressedKey);
 
 int main(void){
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
-    volatile int * ps2_ptr = (volatile int *) PS2_BASE;
+    //volatile int * ps2_ptr = (volatile int *) PS2_BASE;
     volatile int * KEY_ptr = (volatile int *) KEY_BASE;
     volatile int * SW_ptr = (volatile int *) SW_BASE;
 
@@ -180,6 +180,21 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     int bit_3210 = 0;
     int SW_value = 0;
 
+    /*Still testing*/
+    /*
+    unsigned char select_disk_input = 0;
+    //The key_input from the keyboard
+    read_keyboard(&select_disk_input);
+
+    if (select_disk_input == 0x16){ //Choose small
+        SW_value = 0;
+    } else if (select_disk_input == 0x1E){ //Choose medium
+        SW_value = 1;
+    } else if (select_disk_input == 0x26){ //Choose large
+        SW_value = 2;
+    }*/
+
+
     //The key_input from the keyboard
     read_keyboard(&key_input);
 
@@ -187,13 +202,14 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         bit_3210 = 0b0100;
     } else if (key_input == 0x72){ //Check if down arrow (go center)
         bit_3210 = 0b0010;
-    } else if (key_input == 0x74){ //Check if down arrow (go right)
+    } else if (key_input == 0x74){ //Check if right arrow (go right)
         bit_3210 = 0b0001;
     }
 
     if (bit_3210 != 0){
         //Get which disks to move by having the SW
-        SW_value = (*SW_ptr) & 0b11; //Get the value of the first 2 SW
+
+        SW_value = (*SW_ptr) & 0b111; //Get the value of the first 3 SW
         direction_rods(disks, SW_value, bit_3210);
     }
 
@@ -382,6 +398,16 @@ void delete_disk_column(struct disk_info disk){
 //Create the direction pattern to go left, center, right
 
 void direction_rods(struct disk_info disks[], int index, int direction) {
+    if (index == 0b001){
+        index = 0;
+    } else if (index == 0b010){
+        index = 1;
+    } else if (index == 0b100){
+        index = 2;
+    } else {
+        return;
+    }
+    
     // Get the disk to move
     struct disk_info *current = &disks[index]; //index is the SW where 0,1,2 represent S, M, L Disks
 
@@ -398,6 +424,8 @@ void direction_rods(struct disk_info disks[], int index, int direction) {
         center = true;
     } else if (direction == 0b0100){
         left = true;
+    } else {
+        return;
     }
 
 
