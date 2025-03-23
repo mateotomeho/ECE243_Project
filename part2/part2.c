@@ -45,8 +45,12 @@ int column1[3] = {0};
 int column2[3] = {0};
 int rod_positions[3] = {55, 159, 263};
 
+int column0_hard[4] = {0};
+int column1_hard[4] = {0};
+int column2_hard[4] = {0};
 
-const int N = 3; //number of Disks
+
+int N = 3; //number of Disks
 
 //Function declaration
 void plot_pixel(int x, int y, short int line_color);
@@ -70,6 +74,12 @@ int main(void){
     volatile int * KEY_ptr = (volatile int *) KEY_BASE;
     volatile int * SW_ptr = (volatile int *) SW_BASE;
 
+    int mode = (*SW_ptr) & 0b1000000000; //Get SW[9]
+    if (mode == 0){
+        N = 3; //easy mode
+    } else {
+        N = 4; //hard mode
+    }
 
     //Score element
     int num_move = 0;
@@ -92,11 +102,41 @@ int main(void){
     disks[i].column = 0;
     }
 	
-    //Intialize the size
-    disks[0].size = 50;  // Small (Blue)
-    disks[1].size = 70;  // Medium (Green)
-    disks[2].size = 90;  // Large (Red)
-	
+
+    if (mode == 0) {
+        //Intialize the size
+        disks[0].size = 50;  // Small (Blue)
+        disks[1].size = 70;  // Medium (Green)
+        disks[2].size = 90;  // Large (Red)
+
+        //Initialize the colour
+        disks[0].colour = colour_array[4];  // Small (Blue)
+        disks[1].colour = colour_array[2];  // Medium (Green)
+        disks[2].colour = colour_array[1];  // Large (Red)
+
+        //Initialize the column
+        for (int i = 0; i < N; i++) {
+            column0[i] = disks[i].size;
+        }
+    } else {
+        //Intialize the size
+        disks[0].size = 30;  // Very Small (Yellow)
+        disks[1].size = 50;  // Small (Blue)
+        disks[2].size = 70;  // Medium (Green)
+        disks[3].size = 90;  // Large (Red)
+
+        //Initialize the colour
+        disks[0].colour = colour_array[6];  // Very Small (Yellow)
+        disks[1].colour = colour_array[4];  // Small (Blue)
+        disks[2].colour = colour_array[2];  // Medium (Green)
+        disks[3].colour = colour_array[1];  // Large (Red)
+
+        //Initialize the column
+        for (int i = 0; i < N; i++) {
+            column0_hard[i] = disks[i].size;
+        }
+    }
+
     //Intialize the location of the disks
     for (int i = 0; i < N; i++) {
         //Small at (30,10), Medium at (20,50), Large at (10,90)
@@ -104,23 +144,7 @@ int main(void){
         //disks[i].x = 30 - i*10;  
 		disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
         disks[i].y = 20 + i*40;
-
         //printf("Disk %d: x = %d, y = %d\n", i, disks[i].x, disks[i].y);
-    }
-
-
-
-
-
-
-    //Initialize the colour
-    disks[0].colour = colour_array[4];  // Small (Blue)
-    disks[1].colour = colour_array[2];  // Medium (Green)
-    disks[2].colour = colour_array[1];  // Large (Red)
-
-    //Initialize the column
-    for (int i = 0; i < N; i++) {
-        column0[i] = disks[i].size;
     }
 
     /* set front pixel buffer to Buffer 1 */
@@ -210,7 +234,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     if (bit_3210 != 0){
         //Get which disks to move by having the SW
 
-        SW_value = (*SW_ptr) & 0b111; //Get the value of the first 3 SW
+        SW_value = (*SW_ptr) & 0b1111; //Get the value of the first 4 SW
         direction_rods(disks, SW_value, bit_3210);
     }
 
@@ -286,82 +310,160 @@ void drawBars(){
 bool add_disk_column(struct disk_info disk, int direction){
     struct disk_info *current = &disk;
 
-    
-    //Verify that the disk is the highest element on the column right now
-    int i = 0;  // start from the top
+    if (N == 3) {//Easy mode
+        //Verify that the disk is the highest element on the column right now
+        int i = 0;  // start from the top
 
-    //Get the correct column array
-    int *column = NULL;
-    if (current->column == 0) {
-        column = column0;
-    } else if (current->column == 1) {
-        column = column1;
-    } else if (current->column == 2) {
-        column = column2;
-    }
-
-    //Find the topmost nonzero disk
-    while (i < 3 && column[i] == 0) {
-        i++;
-    }
-
-    //If i = 3 then the entire column is full of 0 == empty
-    //If i < 3 then there is a item in the column
-    //Ensure it's the disk we want to move
-    if ((i < 3) && (column[i] != current->size)) {
-        return false;
-    }
-
-    bool left = false;
-    bool center = false;
-    bool right = false;
-
-    //Get the direction to go
-    //KEY2 == LEFT // KEY1 == CENTER // KEY0 == RIGHT
-
-    if (direction == 0b0001){
-        right = true;
-    } else if (direction == 0b0010){
-        center = true;
-    } else if (direction == 0b0100){
-        left = true;
-    }
-
-    //Start from the end and goes to the begin
-    for (int i = N-1 ; i >= 0; i--){
-        //Check LEFT
-        if(left){
-            //Check if there is a smaller disk already here
-            if ((column0[i] != 0) && (current->size > column0[i])) {
-                return false;
-            } else if (column0[i] == 0){ //Check if space is available
-                column0[i] = current->size;
-                return true;
-            }
-        } 
-
-        //Check CENTER
-        if(center){
-            //Check if there is a smaller disk already here
-            if ((column1[i] != 0) && (current->size > column1[i])) {
-                return false;
-            } else if (column1[i] == 0){ //Check if space is available
-                column1[i] = current->size;
-                return true;
-            }
+        //Get the correct column array
+        int *column = NULL;
+        if (current->column == 0) {
+            column = column0;
+        } else if (current->column == 1) {
+            column = column1;
+        } else if (current->column == 2) {
+            column = column2;
         }
 
-        //Check RIGHT
-        if(right){
-            //Check if there is a smaller disk already here
-            if ((column2[i] != 0) && (current->size > column2[i])) {
-                return false;
-            } else if (column2[i] == 0){ //Check if space is available
-                column2[i] = current->size;
-                return true;
-            }
+        //Find the topmost nonzero disk
+        while (i < 3 && column[i] == 0) {
+            i++;
         }
 
+        //If i = 3 then the entire column is full of 0 == empty
+        //If i < 3 then there is a item in the column
+        //Ensure it's the disk we want to move
+        if ((i < 3) && (column[i] != current->size)) {
+            return false;
+        }
+
+        bool left = false;
+        bool center = false;
+        bool right = false;
+
+        //Get the direction to go
+        //KEY2 == LEFT // KEY1 == CENTER // KEY0 == RIGHT
+
+        if (direction == 0b0001){
+            right = true;
+        } else if (direction == 0b0010){
+            center = true;
+        } else if (direction == 0b0100){
+            left = true;
+        }
+
+        //Start from the end and goes to the begin
+        for (int i = N-1 ; i >= 0; i--){
+            //Check LEFT
+            if(left){
+                //Check if there is a smaller disk already here
+                if ((column0[i] != 0) && (current->size > column0[i])) {
+                    return false;
+                } else if (column0[i] == 0){ //Check if space is available
+                    column0[i] = current->size;
+                    return true;
+                }
+            } 
+
+            //Check CENTER
+            if(center){
+                //Check if there is a smaller disk already here
+                if ((column1[i] != 0) && (current->size > column1[i])) {
+                    return false;
+                } else if (column1[i] == 0){ //Check if space is available
+                    column1[i] = current->size;
+                    return true;
+                }
+            }
+
+            //Check RIGHT
+            if(right){
+                //Check if there is a smaller disk already here
+                if ((column2[i] != 0) && (current->size > column2[i])) {
+                    return false;
+                } else if (column2[i] == 0){ //Check if space is available
+                    column2[i] = current->size;
+                    return true;
+                }
+            }
+
+        }
+    } else { //Hard mode
+        //Verify that the disk is the highest element on the column right now
+        int i = 0;  // start from the top
+
+        //Get the correct column array
+        int *column = NULL;
+        if (current->column == 0) {
+            column = column0_hard;
+        } else if (current->column == 1) {
+            column = column1_hard;
+        } else if (current->column == 2) {
+            column = column2_hard;
+        }
+
+        //Find the topmost nonzero disk
+        while (i < 4 && column[i] == 0) {
+            i++;
+        }
+
+        //If i = 3 then the entire column is full of 0 == empty
+        //If i < 3 then there is a item in the column
+        //Ensure it's the disk we want to move
+        if ((i < 4) && (column[i] != current->size)) {
+            return false;
+        }
+
+        bool left = false;
+        bool center = false;
+        bool right = false;
+
+        //Get the direction to go
+        //KEY2 == LEFT // KEY1 == CENTER // KEY0 == RIGHT
+
+        if (direction == 0b0001){
+            right = true;
+        } else if (direction == 0b0010){
+            center = true;
+        } else if (direction == 0b0100){
+            left = true;
+        }
+
+        //Start from the end and goes to the begin
+        for (int i = N-1 ; i >= 0; i--){
+            //Check LEFT
+            if(left){
+                //Check if there is a smaller disk already here
+                if ((column0_hard[i] != 0) && (current->size > column0_hard[i])) {
+                    return false;
+                } else if (column0_hard[i] == 0){ //Check if space is available
+                    column0_hard[i] = current->size;
+                    return true;
+                }
+            } 
+
+            //Check CENTER
+            if(center){
+                //Check if there is a smaller disk already here
+                if ((column1_hard[i] != 0) && (current->size > column1_hard[i])) {
+                    return false;
+                } else if (column1_hard[i] == 0){ //Check if space is available
+                    column1_hard[i] = current->size;
+                    return true;
+                }
+            }
+
+            //Check RIGHT
+            if(right){
+                //Check if there is a smaller disk already here
+                if ((column2_hard[i] != 0) && (current->size > column2_hard[i])) {
+                    return false;
+                } else if (column2_hard[i] == 0){ //Check if space is available
+                    column2_hard[i] = current->size;
+                    return true;
+                }
+            }
+
+        }
     }
 
     // If none of the conditions matched, return false to prevent warning
@@ -372,43 +474,84 @@ bool add_disk_column(struct disk_info disk, int direction){
 void delete_disk_column(struct disk_info disk){
     struct disk_info *current = &disk; 
 
-    //Go through the column and remove the disk size with 0
-    for (int i = 0; i < N; i++){
-        if (current->column == 0){
-            if (column0[i] == current->size){
-                column0[i] = 0;
-                return;
+    if (N == 3) { //Easy mode
+        //Go through the column and remove the disk size with 0
+        for (int i = 0; i < N; i++){
+            if (current->column == 0){
+                if (column0[i] == current->size){
+                    column0[i] = 0;
+                    return;
+                }
+            }
+            if (current->column == 1){
+                if (column1[i] == current->size){
+                    column1[i] = 0;
+                    return;
+                }
+            }
+
+            if (current->column == 2){
+                if (column2[i] == current->size){
+                    column2[i] = 0;
+                    return;
+                }
             }
         }
-        if (current->column == 1){
-            if (column1[i] == current->size){
-                column1[i] = 0;
-                return;
+    } else { //Hard mode
+        //Go through the column and remove the disk size with 0
+        for (int i = 0; i < N; i++){
+            if (current->column == 0){
+                if (column0_hard[i] == current->size){
+                    column0_hard[i] = 0;
+                    return;
+                }
+            }
+            if (current->column == 1){
+                if (column1_hard[i] == current->size){
+                    column1_hard[i] = 0;
+                    return;
+                }
+            }
+
+            if (current->column == 2){
+                if (column2_hard[i] == current->size){
+                    column2_hard[i] = 0;
+                    return;
+                }
             }
         }
 
-        if (current->column == 2){
-            if (column2[i] == current->size){
-                column2[i] = 0;
-                return;
-            }
-        }
     }
+
 }
 /////////////////////////////////////////////////////////////////////////////////////
 //Create the direction pattern to go left, center, right
 
 void direction_rods(struct disk_info disks[], int index, int direction) {
-    if (index == 0b001){
-        index = 0;
-    } else if (index == 0b010){
-        index = 1;
-    } else if (index == 0b100){
-        index = 2;
-    } else {
-        return;
+    if (N == 3){ //easy mode
+        if (index == 0b001){
+            index = 0;
+        } else if (index == 0b010){
+            index = 1;
+        } else if (index == 0b100){
+            index = 2;
+        } else {
+            return;
+        }
+    } else { //hard mode
+        if (index == 0b001){
+            index = 0;
+        } else if (index == 0b010){
+            index = 1;
+        } else if (index == 0b100){
+            index = 2;
+        } else if (index == 0b1000){
+            index = 3;
+        } else {
+            return;
+        }
     }
-    
+
     // Get the disk to move
     struct disk_info *current = &disks[index]; //index is the SW where 0,1,2 represent S, M, L Disks
 
@@ -448,6 +591,8 @@ void direction_rods(struct disk_info disks[], int index, int direction) {
                 current->x = 20;
             } else if (current->size == 90){
                 current->x = 10;
+            } else if (current->size == 30){
+                current->x = rod_positions[0] - (current->size / 2);;
             }
             current->y = 80;
 
@@ -481,6 +626,8 @@ void direction_rods(struct disk_info disks[], int index, int direction) {
                 current->x = 230;
             } else if (current->size == 90){
                 current->x = 220;
+            } else if (current->size == 30){
+                current->x = rod_positions[2] - (current->size / 2);;
             }
             current->y = 60;
             delete_disk_column(*current); //Delete the disk from column array before update
