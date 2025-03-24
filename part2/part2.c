@@ -18,6 +18,8 @@ For the game complexity, make a hard mode with 4 disks
 #define TIMER_BASE			0xFF202000
 #define AUDIO_BASE			0xFF203040
 #define PS2_BASE			0xFF200100
+#define HEX3_HEX0_BASE	    0xFF200020
+#define HEX5_HEX4_BASE		0xFF200030
 
 
 volatile int pixel_buffer_start; // global variable
@@ -51,6 +53,7 @@ int column2_hard[4] = {0};
 
 
 int N = 3; //number of Disks
+int num_move = 0; //number of Moves
 
 //Function declaration
 void plot_pixel(int x, int y, short int line_color);
@@ -67,6 +70,9 @@ void direction_rods(struct disk_info disks[], int index, int direction);
 bool add_disk_column(struct disk_info disk, int direction);
 void delete_disk_column(struct disk_info disk);
 void read_keyboard(unsigned char *pressedKey);
+int num_move_tracker(int num_move);
+void display_hex(int num);
+
 
 int main(void){
     volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
@@ -81,8 +87,6 @@ int main(void){
         N = 4; //hard mode
     }
 
-    //Score element
-    int num_move = 0;
 
     struct disk_info disks[N]; //Create an array of disks of struct disk_info
 
@@ -205,21 +209,6 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     int bit_3210 = 0;
     int SW_value = 0;
 
-    /*Still testing*/
-    /*
-    unsigned char select_disk_input = 0;
-    //The key_input from the keyboard
-    read_keyboard(&select_disk_input);
-
-    if (select_disk_input == 0x16){ //Choose small
-        SW_value = 0;
-    } else if (select_disk_input == 0x1E){ //Choose medium
-        SW_value = 1;
-    } else if (select_disk_input == 0x26){ //Choose large
-        SW_value = 2;
-    }*/
-
-
     //The key_input from the keyboard
     read_keyboard(&key_input);
 
@@ -238,35 +227,40 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         direction_rods(disks, SW_value, bit_3210);
     }
 
-    /*
-    //Movement control of a disk towards another rods 
-    //Check the edge capture of KEY_PUSHBUTTON
-    //KEY2 == LEFT // KEY1 == CENTER // KEY0 == RIGHT
-    int edge_capture = 0;
-    int bit_3210 = 0;
+    //Display the num of move
+    display_hex(num_move);
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+void display_hex(int num){
+    unsigned char hex_num[10] = { //8 bits values
+    0x3F,  // 0
+    0x06,  // 1
+    0x5B,  // 2
+    0x4F,  // 3
+    0x66,  // 4
+    0x6D,  // 5
+    0x7D,  // 6
+    0x07,  // 7
+    0x7F,  // 8
+    0x6F   // 9
+    };
 
-    int SW_value = 0;
-    //get the KEYS edge capture register into the register
-    edge_capture = *(KEY_ptr + 3);
-    bit_3210 = 0b1111;
-    bit_3210 = bit_3210 & edge_capture; //Select the first 4 bit of edge capture
+    if (num < 0 || num > 99) {
+        return;  // Make sure the num is in the range
+    }
     
-    //If there is a 1 somewhere go to the function
-    //Clear the edge-capture by writing a one into it
-    //Decide if it is a LEFT, CENTER, RIGHT, instructions through &0b0111 if 0b0001...
-    if (bit_3210 != 0){
-        //clear the edge capture
-        *(KEY_ptr + 3) = bit_3210; //dereference the edge-capture = sw
+    volatile int * HEX_ptr = (volatile int *) HEX3_HEX0_BASE;
+    int ones = num%10; //get the first digit
+    int tens = (num/10)%10; //get the second digit
 
-        //Get which disks to move by having the SW
-        SW_value = (*SW_ptr) & 0b11; //Get the value of the first 2 SW
-        direction_rods(disks, SW_value, bit_3210);
-    } 
-    */
+    // Combine 2 digits into one 32-bit value
+    unsigned int hex_value = (hex_num[tens] << 8) | hex_num[ones];
 
-
+    // Write the combined value to HEX1 and HEX0
+    *HEX_ptr = hex_value;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
 void read_keyboard(unsigned char *pressedKey) {
     volatile int *ps2_ptr = (int *) 0xFF200100; //Get the PS/2 data register
 
@@ -282,7 +276,6 @@ void read_keyboard(unsigned char *pressedKey) {
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
-
 //Or Draw rectangular shape function (just change the size)
 void draw_disk(struct disk_info disk) {
     for (int x_axis = 0; x_axis < disk.size; x_axis++) {
@@ -599,6 +592,7 @@ void direction_rods(struct disk_info disks[], int index, int direction) {
             delete_disk_column(*current); //Delete the disk from column array before update
             //Delete use the position of current in the column before the update
             current->column = 0;
+            num_move = num_move_tracker(num_move);
         }
     } else if (center){
         if (add_disk_column(*current, direction)) {
@@ -617,6 +611,7 @@ void direction_rods(struct disk_info disks[], int index, int direction) {
             delete_disk_column(*current); //Delete the disk from column array before update
             //Delete use the position of current in the column before the update
             current->column = 1;
+            num_move = num_move_tracker(num_move);
         }
     }  else if (right){
         if (add_disk_column(*current, direction)){
@@ -633,6 +628,7 @@ void direction_rods(struct disk_info disks[], int index, int direction) {
             delete_disk_column(*current); //Delete the disk from column array before update
             //Delete use the position of current in the column before the update
             current->column = 2;
+            num_move = num_move_tracker(num_move);
         }
     }
 }
@@ -670,24 +666,9 @@ void update_disk_position(struct disk_info disks[], int index) {
 
 //Increment the number of move by one + display it 
 int num_move_tracker(int num_move){
-    num_move ++;
+    num_move = num_move + 1;
     return num_move;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ////HELPER FUNCTION///////
