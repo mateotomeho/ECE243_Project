@@ -52,7 +52,6 @@ int column0_hard[4] = {0};
 int column1_hard[4] = {0};
 int column2_hard[4] = {0};
 
-
 int N = 3; //number of Disks
 int num_move = 0; //number of Moves
 
@@ -96,9 +95,7 @@ int main(void){
         N = 4; //hard mode
     }
 
-
     struct disk_info disks[N]; //Create an array of disks of struct disk_info
-
 
                                   //White,  Red,   Green, Blue,  Cyan,   Magenta, Yellow, Orange, Purple, 
     short int colour_array[9] = {0xFFFF, 0xF800, 0x07E0, 0x001F, 0x07FF, 0xF81F, 0xFFE0, 0xFC60, 0x780F}; 
@@ -114,7 +111,6 @@ int main(void){
     disks[i].y_old2 = 0;
     disks[i].column = 0;
     }
-	
 
     if (mode == 0) {
         //Intialize the size
@@ -172,7 +168,6 @@ int main(void){
     *(pixel_ctrl_ptr + 1) = (int) &Buffer2;
     pixel_buffer_start = *(pixel_ctrl_ptr + 1); // we draw on the back buffer
     clear_screen(); // pixel_buffer_start points to the pixel buffer
-	
 
     while (1)
     {
@@ -182,11 +177,11 @@ int main(void){
         	wait_for_vsync();
         	pixel_buffer_start = *(pixel_ctrl_ptr + 1);
         
-        	// Check for KEY0 release to exit start screen
+        	//if key 0 is released then go to the game
         	if (*KEY_edge_ptr & 0x1) {
             	start_screen = false;
-            	clear_screen(); // Clear screen before drawing game
-            	*KEY_edge_ptr = 0x1; // Clear KEY0 edge capture
+            	clear_screen();
+            	*KEY_edge_ptr = 0x1; //edge capture
             	continue;
     		}
 			continue;
@@ -195,7 +190,6 @@ int main(void){
         /* Erase any disk and lines that were drawn in the last iteration */
 		draw(disks, KEY_ptr, SW_ptr);
 		
-
         // code for drawing the disk and lines (not shown)
         // code for updating the locations of disk (not shown)
 
@@ -203,7 +197,6 @@ int main(void){
         pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
     }
 }
-
 
 
 void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr) {
@@ -219,7 +212,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     //Draw the 3 rods for the game
 	drawBars();
 	
-	//draw the text
+	//draw the text for during game
 	int title = strlen("TOWER OF HANOI") * 10;
 	int start_Xcoord = (320 - title) / 2;
 	draw_text(start_Xcoord, 30, "TOWER OF HANOI", 0xFFFF);
@@ -227,13 +220,13 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 	int score = strlen("SCORE:") * 10;
 	int score_Xcoord = (320 - (score+20))/2;
 	draw_text(score_Xcoord, 50, "SCORE:", 0xFFFF);
-	// Draw the two‑digit move count
-	int tens = num_move / 10;
-	int ones = num_move % 10;
-	drawLetter(score_Xcoord + score +2, 50, '0' + tens, 0xFFFF);
-	drawLetter(score_Xcoord + score+12, 50, '0' + ones, 0xFFFF);
+	//draw the two‑digit move count
+	int tens = num_move/10;
+	int ones = num_move%10;
+	drawLetter(score_Xcoord+score+2, 50,'0'+tens, 0xFFFF);
+	drawLetter(score_Xcoord+score+12, 50,'0'+ones, 0xFFFF);
 	
-    //Draw each disk
+    //draw each disk
     for (int index = 0; index < N; index++){
         draw_disk(disks[index]);
     }
@@ -271,15 +264,15 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     display_hex(num_move);
 }
 
-/////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 void draw_start_screen() {
     clear_screen();
     int title_length = strlen("TOWER OF HANOI") * 10;
     int press = strlen("PRESS KEY0 TO START") * 10;
 	int regular = strlen("REGULAR MODE") * 10;
 	int hard = strlen("HARD MODE") * 10;
-    int title_x = (320 - title_length) / 2;
-    int press_x = (320 - press) / 2;
+    int title_x = (320 - title_length)/2;
+    int press_x = (320 - press)/2;
     draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
     draw_text(press_x, 100, "PRESS KEY0 TO START", 0xFFFF);
 	draw_text(20, 150, "REGULAR MODE", 0xFFFF);
@@ -328,7 +321,6 @@ void read_keyboard(unsigned char *pressedKey) {
         }
     //}
 }
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //Or Draw rectangular shape function (just change the size)
@@ -387,6 +379,7 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char space_array[8]= {0,0,0,0,0,0,0,0};
 	static const unsigned char colon_array[8] = {0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x00};
 	const unsigned char *letter;
+	
     switch(c) {
         case 'T': letter = T_array; break;
         case 'O': letter = O_array; break;
@@ -431,7 +424,7 @@ void drawLetter(int x, int y, char c, short int color){
         }
     }
 }
-	
+/////////////////////////////////////////////////////////////////////////////////////////
 void draw_text(int x, int y, const char *s, short int color) {
     while(*s) {
         drawLetter(x, y, *s++, color);
