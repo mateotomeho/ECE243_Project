@@ -21,12 +21,26 @@ For the game complexity, make a hard mode with 4 disks
 #define PS2_BASE			0xFF200100
 #define HEX3_HEX0_BASE	    0xFF200020
 #define HEX5_HEX4_BASE		0xFF200030
+#define COUNTER_DELAY 100000000 //number that we'll count simce 100MHz
+
 
 
 volatile int pixel_buffer_start; // global variable
 short int Buffer1[240][512]; // 240 rows, 512 (320 + padding) columns
 short int Buffer2[240][512];
+/////////////////////////////////////////////////////////////////////////////////////////
+//Struct for the timer registers
+struct timer_t {
+       volatile unsigned int status;
+       volatile unsigned int control;
+       volatile unsigned int periodlo;
+       volatile unsigned int periodhi;
+       volatile unsigned int snaplo;
+       volatile unsigned int snaphi;
+};
 
+struct timer_t * const timer = (struct timer_t *) TIMER_BASE;
+int time = 90;
 /////////////////////////////////////////////////////////////////////////////////////////
 //Struct for each disks : store location (x,y), direction (x, y), colour
 struct disk_info {
@@ -87,12 +101,16 @@ bool add_disk_column(struct disk_info disk, int direction);
 void delete_disk_column(struct disk_info disk);
 void read_keyboard(unsigned char *pressedKey);
 int num_move_tracker(int num_move);
-void display_hex(int num);
+void display_hex_10(int num);
+void display_hex_54(int num);
 void drawLetter(int x, int y, char c, short int color);
 void draw_text(int x, int y, const char *s, short int color);
 void draw_start_screen();
 void restart_game(struct disk_info disks[]);
 void best_move_tracker(struct disk_info disks[]);
+void setup_timer();
+bool delay_sec();
+
 
 
 int main(void){
@@ -194,6 +212,9 @@ int main(void){
         disks[i].y = 20 + i*40;
         //printf("Disk %d: x = %d, y = %d\n", i, disks[i].x, disks[i].y);
     }
+
+    //Set up timer
+    setup_timer();
 
     /* set front pixel buffer to Buffer 1 */
     *(pixel_ctrl_ptr + 1) = (int) &Buffer1; // first store the address in the  back buffer
@@ -297,6 +318,22 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     int bit_3210 = 0;
     int SW_value = 0;
 
+    //SELECT THE DISK TO MOVE//
+    //Read key_input from the keyboard
+    /*
+    read_keyboard(&key_input);
+    if (key_input == 0x16) { // Check if '1' is pressed
+        SW_value = 0b00001;
+    } else if (key_input == 0x1E) { // Check if '2' is pressed
+        SW_value = 0b00010;
+    } else if (key_input == 0x26) { // Check if '3' is pressed
+        SW_value = 0b00100;
+    } else if (key_input == 0x25) { // Check if '4' is pressed
+        SW_value = 0b01000;
+    } else if (key_input == 0x2E) { // Check if '5' is pressed
+        SW_value = 0b10000;
+    }*/
+    //SELECT THE DIRECTION TO MOVE//
     //The key_input from the keyboard
     read_keyboard(&key_input);
 
@@ -316,10 +353,22 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     }
 
     //Display the num of move
-    display_hex(num_move);
+    display_hex_10(num_move);
 
     //Check if the user won to display there stats
     best_move_tracker(disks);
+
+    display_hex_54(time);
+    //Show the time
+    if (delay_sec() == true){
+        time --;
+
+
+        //Reset time if reach 0
+        if (time < 0){
+        time = 90;
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -337,7 +386,7 @@ void draw_start_screen() {
 	draw_text(200, 150, "HARD MODE", 0xFFFF);
 }
 /////////////////////////////////////////////////////////////////////////////////////////
-void display_hex(int num){
+void display_hex_10(int num){
     unsigned char hex_num[10] = { //8 bits values
     0x3F,  // 0
     0x06,  // 1
@@ -356,6 +405,36 @@ void display_hex(int num){
     }
     
     volatile int * HEX_ptr = (volatile int *) HEX3_HEX0_BASE;
+    int ones = num%10; //get the first digit
+    int tens = (num/10)%10; //get the second digit
+
+    // Combine 2 digits into one 32-bit value
+    unsigned int hex_value = (hex_num[tens] << 8) | hex_num[ones];
+
+    // Write the combined value to HEX1 and HEX0
+    *HEX_ptr = hex_value;
+}
+
+
+void display_hex_54(int num){
+    unsigned char hex_num[10] = { //8 bits values
+    0x3F,  // 0
+    0x06,  // 1
+    0x5B,  // 2
+    0x4F,  // 3
+    0x66,  // 4
+    0x6D,  // 5
+    0x7D,  // 6
+    0x07,  // 7
+    0x7F,  // 8
+    0x6F   // 9
+    };
+
+    if (num < 0 || num > 99) {
+        return;  // Make sure the num is in the range
+    }
+    
+    volatile int * HEX_ptr = (volatile int *) HEX5_HEX4_BASE;
     int ones = num%10; //get the first digit
     int tens = (num/10)%10; //get the second digit
 
@@ -1143,9 +1222,32 @@ void restart_game(struct disk_info disks[]){
 
         //Restart num_move
         num_move = 0;
+
+        //Restart the time
+        time = 90;
     }
     restart = false;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//TIMER FUNCTION//
+void setup_timer(){
+       timer->control = 0x8; //Stop the timer in case it is on
+       timer->status = 0; //Clear TO bit in case it is on
+       timer->periodlo = (COUNTER_DELAY & 0x0000FFFF); //laod the 16 smaller bit of counter
+       timer->periodhi = (COUNTER_DELAY & 0xFFFF0000) >> 16; //shift right the high 16bit of counteer
+       timer->control = 0b110; //Start the timer + CONT
+}
+
+bool delay_sec(){
+    if ((timer->status & 0x1) == 1){ //get the TO bit, if 1 then 1 sec passed
+        timer->status = 0; // reset TO 
+        return true;
+    }
+
+    return false;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ////HELPER FUNCTION///////
@@ -1234,4 +1336,3 @@ void plot_pixel(int x, int y, short int line_color)
 }
 
 //////////////////////////////////////////////////////////////////////////////
- 
