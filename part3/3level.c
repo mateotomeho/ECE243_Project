@@ -92,7 +92,7 @@ void drawLetter(int x, int y, char c, short int color);
 void draw_text(int x, int y, const char *s, short int color);
 void draw_start_screen();
 void restart_game(struct disk_info disks[]);
-void best_move_tracker();
+void best_move_tracker(struct disk_info disks[]);
 
 
 int main(void){
@@ -319,7 +319,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     display_hex(num_move);
 
     //Check if the user won to display there stats
-    best_move_tracker();
+    best_move_tracker(disks);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -979,7 +979,7 @@ int num_move_tracker(int num_move){
 }
 
 
-void best_move_tracker(){
+void best_move_tracker(struct disk_info disks[]){
     //Check the mode and if we are at the winning state
     int potential_move = num_move;
     bool win = false;
@@ -1038,7 +1038,7 @@ void restart_game(struct disk_info disks[]){
     if (restart){
         //Get the mode
         volatile int * SW_ptr = (volatile int *) SW_BASE;
-        int mode = (*SW_ptr) & 0b1000000000; //Get SW[9]
+        int mode = (*SW_ptr) & 0b1100000000; //Get SW[9]
         if (mode == 0){
             N = 3; //easy mode
         } else if (mode == 0b1000000000){
