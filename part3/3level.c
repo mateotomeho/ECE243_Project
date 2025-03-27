@@ -82,6 +82,10 @@ int best_move_easy = 0;
 int best_move_medium = 0;
 int best_move_hard = 0;
 
+//Boolean for winning or losing
+bool winning = false;
+bool losing = false;
+
 
 bool start_screen = true;
 
@@ -110,6 +114,7 @@ void restart_game(struct disk_info disks[]);
 void best_move_tracker(struct disk_info disks[]);
 void setup_timer();
 bool delay_sec();
+void no_more_time();
 
 
 
@@ -359,6 +364,12 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     best_move_tracker(disks);
 
     display_hex_54(time);
+
+    //Check if the user don't have any time
+    no_more_time(); //will set losing to true
+
+
+    
     //Show the time
     if (delay_sec() == true){
         time --;
@@ -369,6 +380,9 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         time = 90;
         }
     }
+
+   
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -1058,10 +1072,12 @@ int num_move_tracker(int num_move){
 }
 
 
+//Check the best score
 void best_move_tracker(struct disk_info disks[]){
     //Check the mode and if we are at the winning state
     int potential_move = num_move;
     bool win = false;
+
     if (N == 3){
         //Check if winning state
         if (column2[0] == 50 && column2[1] == 70 && column2[2] == 90) {
@@ -1092,6 +1108,7 @@ void best_move_tracker(struct disk_info disks[]){
     }
     
     if (win){
+        winning = true;
         // Print the results
         printf("Best Move Easy: %d \nBest Move Medium: %d \nBest Move Hard: %d\n", 
             best_move_easy, best_move_medium, best_move_hard);
@@ -1225,6 +1242,10 @@ void restart_game(struct disk_info disks[]){
 
         //Restart the time
         time = 90;
+
+        //Restart the bool for win or losing
+        winning = false;
+        losing = false;
     }
     restart = false;
 }
@@ -1248,6 +1269,11 @@ bool delay_sec(){
     return false;
 }
 
+void no_more_time(){
+    if (time == 0){
+        losing = true;
+    }
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ////HELPER FUNCTION///////
