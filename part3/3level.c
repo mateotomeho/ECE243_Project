@@ -1,13 +1,5 @@
-//Part2 of Project ECE243: Towers of Hanoi
+//Part3 of Project ECE243: Towers of Hanoi
 
-/*Goal 
-
-Finish the game logic movement 
-Connect the game with the PS/2 Keyboard 
-If time left, add the Score
-For the game complexity, make a hard mode with 4 disks
-
-*/
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h> //to use randomness ran() function
@@ -299,6 +291,13 @@ int main(void){
         restart_game(disks);
 
         wait_for_vsync(); // swap front and back buffers on VGA vertical sync
+        
+        //If the game is done wait until restart
+        if (once == 1){
+            while(restart == false){
+            restart_game(disks);
+            }
+        } 
         pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
 
         //Music for winning or losing
@@ -336,7 +335,7 @@ int main(void){
                     }
                     once = 1;
                 } 
-            }   
+            }  
         }
     }
 }
@@ -1328,7 +1327,6 @@ void restart_game(struct disk_info disks[]){
         once = 0;
 
     }
-    restart = false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
