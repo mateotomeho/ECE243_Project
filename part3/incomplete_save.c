@@ -102,6 +102,7 @@ int best_move_hard = 0;
 bool winning = false;
 bool losing = false;
 bool start_screen = true;
+bool end_screen = false;
 bool restart = false;
 int once = 0;
 
@@ -134,6 +135,7 @@ void setup_timer();
 bool delay_sec();
 void no_more_time();
 void play_audio(int *samples, int numSamples);
+void draw_end_screen();
 
 
 int main(void){
@@ -329,26 +331,42 @@ int main(void){
 				}
 			}
 			continue;
-		}
+		}else if (end_screen){
+			clear_screen();
+            draw_end_screen();
+            wait_for_vsync();
+            pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+			
+			unsigned char restart_input = 0;
+			read_keyboard(&restart_input);
+			
+			if(restart_input == 0x2D){
+				end_screen = false;
+            	start_screen = true;
+            	restart = true;
+            	restart_game(disks);
+        	}
+			continue;
+		}else{
 		
-        /* Erase any disk and lines that were drawn in the last iteration */
-		draw(disks, KEY_ptr, SW_ptr);
+        	/* Erase any disk and lines that were drawn in the last iteration */
+			draw(disks, KEY_ptr, SW_ptr);
 		
-        // code for drawing the disk and lines (not shown)
-        // code for updating the locations of disk (not shown)
+        	// code for drawing the disk and lines (not shown)
+        	// code for updating the locations of disk (not shown)
 
-         //Verify if we need to restart the game
-        restart_game(disks);
+         	//Verify if we need to restart the game
+        	restart_game(disks);
 
-        wait_for_vsync(); // swap front and back buffers on VGA vertical sync
+        	wait_for_vsync(); // swap front and back buffers on VGA vertical sync
         
-        //If the game is done wait until restart
-        if (once == 1){
-            while(restart == false){
-            restart_game(disks);
-            }
-        } 
-        pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
+        	//If the game is done wait until restart
+        	if (once == 1){
+            	while(restart == false){
+            	restart_game(disks);
+            	}
+        	} 
+        	pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
 		
 		/*
         //Music for winning or losing
@@ -388,6 +406,7 @@ int main(void){
                 } 
             }  
         }*/
+		}
     }
 }
 
@@ -509,7 +528,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-void draw_start_screen() {
+void draw_start_screen(){
     clear_screen();
     int title_length = strlen("TOWER OF HANOI") * 10;
     int press = strlen("PRESS KEY0 TO START") * 10;
@@ -522,6 +541,24 @@ void draw_start_screen() {
 	draw_text(20, 150, "REGULAR MODE", 0xFFFF);
 	draw_text(200, 150, "HARD MODE", 0xFFFF);
 }
+
+void draw_end_screen(){
+	int title_length = strlen("TOWER OF HANOI") * 10;
+    int message = strlen("GAME COMPLETE!") * 10;
+	int restart_length = strlen("PRESS R TO RESTART") * 10;
+	int score_length = strlen("FINAL SCORE: ") * 10;
+	
+    int title_x = (320 - title_length)/2;
+    int message_x = (320 - message)/2;
+	int restart_x = (320 - restart_length)/2;
+	int score_x = (320 - score_length)/2;
+    draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
+    draw_text(message_x, 100, "GAME COMPLETE!", 0xFFFF);
+	draw_text(restart_x, 150, "PRESS R TO RESTART", 0xFFFF);
+	draw_text(score_x, 200, "FINAL SCORE: ", 0xFFFF);
+}
+	
+	
 /////////////////////////////////////////////////////////////////////////////////////////
 void display_hex_10(int num){
     unsigned char hex_num[10] = { //8 bits values
@@ -1233,6 +1270,7 @@ void best_move_tracker(struct disk_info disks[]){
     
     if (win){
         winning = true;
+		end_screen=true;
         //stop the time
         timer->control = 0b1000; //Press on STOP
 
@@ -1260,6 +1298,8 @@ void restart_game(struct disk_info disks[]){
 
     //If restart, reinitalize everything : column, disk position, score
     if (restart){
+		end_screen = false;
+		start_screen = true;
         //Get the mode
         volatile int * SW_ptr = (volatile int *) SW_BASE;
         int mode = (*SW_ptr) & 0b1100000000; //Get SW[9]
