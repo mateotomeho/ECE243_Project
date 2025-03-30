@@ -223,6 +223,10 @@ int main(void){
 				if (key == 0x24){ //Check if user press e
 					N=3;
 					mode=0;
+					num_move = 0;
+					winning = false;
+    				losing = false;
+    				once = 0;
 					
 					disks[0].size = 50;  // Small (Blue)
         			disks[1].size = 70;  // Medium (Green)
@@ -257,6 +261,10 @@ int main(void){
             	}else if (key == 0x3A){ //Check if user press m
 					N=4;
 					mode=1;
+					num_move = 0;
+					winning = false;
+    				losing = false;
+    				once = 0;
 					
 					disks[0].size = 30;  // Very Small (Yellow)
        		 		disks[1].size = 50;  // Small (Blue)
@@ -293,6 +301,10 @@ int main(void){
 				}else if (key == 0x33){ //Check if user press h
 					N=5;
 					mode = 2;
+					num_move = 0;
+					winning = false;
+    				losing = false;
+    				once = 0;
 					
 					//Intialize the size
         			disks[0].size = 20;  // Extra Small (Pink)
@@ -1341,7 +1353,9 @@ void restart_game(struct disk_info disks[]){
     unsigned char restart_input = 0;
     read_keyboard(&restart_input);
     restart = false;
-
+	winning = false;
+	losing = false;
+	once = 0;
 
     if (restart_input == 0x2D){ //Check if user press R
         restart = true;
@@ -1351,6 +1365,7 @@ void restart_game(struct disk_info disks[]){
     if (restart){
 		end_screen = false;
 		start_screen = true;
+		num_move = 0;
         //Get the mode
         volatile int * SW_ptr = (volatile int *) SW_BASE;
         int mode = (*SW_ptr) & 0b1100000000; //Get SW[9]
