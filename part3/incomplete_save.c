@@ -149,7 +149,7 @@ int main(void){
 	N=3;
 
     struct disk_info disks[5]; //Create an array of disks of struct disk_info
-
+	
                                   //White,  Red,   Green, Blue,  Cyan,   Magenta, Yellow, Orange, Pink, 
     short int colour_array[9] = {0xFFFF, 0xF800, 0x07E0, 0x001F, 0x07FF, 0xF81F, 0xFFE0, 0xFC60, 0xF81F}; 
   
@@ -206,85 +206,6 @@ int main(void){
     pixel_buffer_start = *(pixel_ctrl_ptr + 1); // we draw on the back buffer
     clear_screen(); // pixel_buffer_start points to the pixel buffer
 	
-    if (mode == 0) {
-        //Intialize the size
-        disks[0].size = 50;  // Small (Blue)
-        disks[1].size = 70;  // Medium (Green)
-        disks[2].size = 90;  // Large (Red)
-
-        //Initialize the colour
-        disks[0].colour = colour_array[4];  // Small (Blue)
-        disks[1].colour = colour_array[2];  // Medium (Green)
-        disks[2].colour = colour_array[1];  // Large (Red)
-
-        //Initialize the column
-        for (int i = 0; i < N; i++) {
-            column0[i] = disks[i].size;
-        }
-    } else if (mode == 1) {
-        //Intialize the size
-        disks[0].size = 30;  // Very Small (Yellow)
-        disks[1].size = 50;  // Small (Blue)
-        disks[2].size = 70;  // Medium (Green)
-        disks[3].size = 90;  // Large (Red)
-
-        //Initialize the colour
-        disks[0].colour = colour_array[6];  // Very Small (Yellow)
-        disks[1].colour = colour_array[4];  // Small (Blue)
-        disks[2].colour = colour_array[2];  // Medium (Green)
-        disks[3].colour = colour_array[1];  // Large (Red)
-
-        //Initialize the column
-        for (int i = 0; i < N; i++) {
-            column0_medium[i] = disks[i].size;
-        }
-    } else if (mode == 2){
-        //Intialize the size
-        disks[0].size = 20;  // Extra Small (Pink)
-        disks[1].size = 30;  // Very Small (Yellow)
-        disks[2].size = 50;  // Small (Blue)
-        disks[3].size = 70;  // Medium (Green)
-        disks[4].size = 90;  // Large (Red)
-
-        //Initialize the colour
-        disks[0].colour = colour_array[8];  // Extra Small (Pink)
-        disks[1].colour = colour_array[6];  // Very Small (Yellow)
-        disks[2].colour = colour_array[4];  // Small (Blue)
-        disks[3].colour = colour_array[2];  // Medium (Green)
-        disks[4].colour = colour_array[1];  // Large (Red)
-
-        //Initialize the column
-        for (int i = 0; i < N; i++) {
-            column0_hard[i] = disks[i].size;
-        }
-    }
-
-    //Intialize the location of the disks
-    for (int i = 0; i < N; i++) {
-        //Small at (30,10), Medium at (20,50), Large at (10,90)
-        //Remember each rectangle is 20 pixels in the y-axis
-        //disks[i].x = 30 - i*10;  
-		disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
-        disks[i].y = 20 + i*40;
-        //printf("Disk %d: x = %d, y = %d\n", i, disks[i].x, disks[i].y);
-    }
-
-    //Set up timer
-    setup_timer();
-
-    /* set front pixel buffer to Buffer 1 */
-    *(pixel_ctrl_ptr + 1) = (int) &Buffer1; // first store the address in the  back buffer
-    /* now, swap the front/back buffers, to set the front buffer location */
-    wait_for_vsync();
-    /* initialize a pointer to the pixel buffer, used by drawing functions */
-    pixel_buffer_start = *pixel_ctrl_ptr;
-    clear_screen(); // pixel_buffer_start points to the pixel buffer
-
-    /* set back pixel buffer to Buffer 2 */
-    *(pixel_ctrl_ptr + 1) = (int) &Buffer2;
-    pixel_buffer_start = *(pixel_ctrl_ptr + 1); // we draw on the back buffer
-    clear_screen(); // pixel_buffer_start points to the pixel buffer
-
     while (1)
     {
 		if (start_screen) {
@@ -331,72 +252,82 @@ int main(void){
                 	start_screen = false;
                 	clear_screen();
 					
-            }else if (key == 0x3A){ //Check if user press m
-				N=4;
-				mode=1;
+            	}else if (key == 0x3A){ //Check if user press m
+					N=4;
+					mode=1;
 					
-				disks[0].size = 30;  // Very Small (Yellow)
-       		 	disks[1].size = 50;  // Small (Blue)
-        		disks[2].size = 70;  // Medium (Green)
-        		disks[3].size = 90;  // Large (Red)
+					disks[0].size = 30;  // Very Small (Yellow)
+       		 		disks[1].size = 50;  // Small (Blue)
+        			disks[2].size = 70;  // Medium (Green)
+        			disks[3].size = 90;  // Large (Red)
 
-        		//Initialize the colour
-        		disks[0].colour = colour_array[6];  // Very Small (Yellow)
-        		disks[1].colour = colour_array[4];  // Small (Blue)
-        		disks[2].colour = colour_array[2];  // Medium (Green)
-        		disks[3].colour = colour_array[1];  // Large (Red)
+        			//Initialize the colour
+        			disks[0].colour = colour_array[6];  // Very Small (Yellow)
+        			disks[1].colour = colour_array[4];  // Small (Blue)
+        			disks[2].colour = colour_array[2];  // Medium (Green)
+        			disks[3].colour = colour_array[1];  // Large (Red)
 				
-				// Reset columns
-                for (int i = 0; i < 5; i++){
-                    column0[i] = column1[i] = column2[i] = 0;
-                    column0_medium[i] = column1_medium[i] = column2_medium[i] = 0;
-                    column0_hard[i] = column1_hard[i] = column2_hard[i] = 0;
-                }
+					// Reset columns
+                	for (int i = 0; i < 5; i++){
+                    	column0[i] = column1[i] = column2[i] = 0;
+                    	column0_medium[i] = column1_medium[i] = column2_medium[i] = 0;
+                    	column0_hard[i] = column1_hard[i] = column2_hard[i] = 0;
+                	}
 				
-                for (int i = 0; i < N; i++){
-                    column0_medium[i] = disks[i].size;
-                }
+                	for (int i = 0; i < N; i++){
+                    	column0_medium[i] = disks[i].size;
+                	}
 				
-                // Reset positions
-                for (int i = 0; i < N; i++){
-                    disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
-                    disks[i].y = 20 + i*40;
-                    disks[i].column = 0;
-                }
+                	// Reset positions
+                	for (int i = 0; i < N; i++){
+                    	disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
+                    	disks[i].y = 20 + i*40;
+                    	disks[i].column = 0;
+                	}
 					
-                start_screen = false;
-                clear_screen();
-                continue;
-			}else if (key == 0x33){ //Check if user press h
-				N=5;
-                start_screen = false;
-                clear_screen();
-                continue;
+                	start_screen = false;
+                	clear_screen();
+                	continue;
+				}else if (key == 0x33){ //Check if user press h
+					N=5;
+					mode = 2;
+					
+					//Intialize the size
+        			disks[0].size = 20;  // Extra Small (Pink)
+        			disks[1].size = 30;  // Very Small (Yellow)
+        			disks[2].size = 50;  // Small (Blue)
+        			disks[3].size = 70;  // Medium (Green)
+        			disks[4].size = 90;  // Large (Red)
+
+        			//Initialize the colour
+        			disks[0].colour = colour_array[8];  // Extra Small (Pink)
+        			disks[1].colour = colour_array[6];  // Very Small (Yellow)
+        			disks[2].colour = colour_array[4];  // Small (Blue)
+        			disks[3].colour = colour_array[2];  // Medium (Green)
+        			disks[4].colour = colour_array[1];  // Large (Red)
+					
+					// Reset columns
+                    for (int i = 0; i < 5; i++){
+                        column0[i] = column1[i] = column2[i] = 0;
+                        column0_medium[i] = column1_medium[i] = column2_medium[i] = 0;
+                        column0_hard[i] = column1_hard[i] = column2_hard[i] = 0;
+                    }
+					
+                    for (int i = 0; i < N; i++){
+                        column0_hard[i] = disks[i].size;
+                    }
+					
+                    // Reset positions
+                    for (int i = 0; i < N; i++){
+                        disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
+                        disks[i].y = 20 + i*40;
+                        disks[i].column = 0;
+                    }
+				
+                	start_screen = false;
+                	clear_screen();
+				}
 			}
-
-            unsigned char user_input = 0;
-		
-            
-            //The key_input from the keyboard
-            read_keyboard(&user_input);
-
-            if (user_input == 0x24){ //Check if user press e
-				N=3;
-                start_screen = false;
-                clear_screen();
-                continue;
-            }else if (user_input == 0x3A){ //Check if user press m
-				N=4;
-                start_screen = false;
-                clear_screen();
-                continue;
-			}else if (user_input == 0x33){ //Check if user press h
-				N=5;
-                start_screen = false;
-                clear_screen();
-                continue;
-			}
-
 			continue;
 		}
 		
