@@ -531,15 +531,19 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 void draw_start_screen(){
     clear_screen();
     int title_length = strlen("TOWER OF HANOI") * 10;
-    int press = strlen("PRESS KEY0 TO START") * 10;
-	int regular = strlen("REGULAR MODE") * 10;
-	int hard = strlen("HARD MODE") * 10;
+	int easy = strlen("EASY MODE: PRESS E") * 10;
+	int medium = strlen("MEDIUM MODE: PRESS M") * 10;
+	int hard = strlen("HARD MODE: PRESS H") * 10;
+	
     int title_x = (320 - title_length)/2;
-    int press_x = (320 - press)/2;
+	int easy_x = (320 - easy)/2;
+	int medium_x = (320 - medium)/2;
+	int hard_x = (320 - hard)/2;
+	
     draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
-    draw_text(press_x, 100, "PRESS KEY0 TO START", 0xFFFF);
-	draw_text(20, 150, "REGULAR MODE", 0xFFFF);
-	draw_text(200, 150, "HARD MODE", 0xFFFF);
+	draw_text(easy_x, 120, "EASY MODE: PRESS E", 0xFFFF);
+	draw_text(medium_x, 150, "MEDIUM MODE: PRESS M", 0xFFFF);
+	draw_text(hard_x, 180, "HARD MODE: PRESS H", 0xFFFF);
 }
 
 void draw_end_screen(){
