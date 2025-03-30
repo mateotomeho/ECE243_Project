@@ -490,9 +490,11 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 
     //Display the num of move
     display_hex_10(num_move);
-
-    //Check if the user won to display there stats
-    best_move_tracker(disks);
+	
+	//Check if the user won to display there stats if not already winning
+	if (!winning) {
+        best_move_tracker(disks);
+    }
 
     display_hex_54(time);
 
@@ -1242,11 +1244,17 @@ void best_move_tracker(struct disk_info disks[]){
     //Check the mode and if we are at the winning state
     int potential_move = num_move;
     bool win = false;
+	static bool animation_complete = false;
 
     if (N == 3){
         //Check if winning state
         if (column2[0] == 50 && column2[1] == 70 && column2[2] == 90) {
-            win = true;
+			//if last disk has stopped moving
+			if (disks[0].y >= 200 || (disks[0].y + 20 >= disks[1].y)){
+            	win = true;
+				animation_complete = true;
+			}
+			
             //Update the best num of move if the numver is less or if best was initially 0
             if (potential_move < best_move_easy || best_move_easy == 0){
                 best_move_easy = potential_move;               
@@ -1255,7 +1263,11 @@ void best_move_tracker(struct disk_info disks[]){
     } else if (N == 4){
         //Check if winning state
         if (column2_medium[0] == 30 && column2_medium[1] == 50 && column2_medium[2] == 70 && column2_medium[3] == 90) {
-            win = true;
+			//if last disk has stopped moving
+			if (disks[0].y >= 200 || (disks[0].y + 20 >= disks[1].y)){
+            	win = true;
+				animation_complete = true;
+			}
             //Update the best num of move if the numver is less or if best was initially 0
             if (potential_move < best_move_medium || best_move_medium == 0){
                 best_move_medium = potential_move;
@@ -1264,7 +1276,11 @@ void best_move_tracker(struct disk_info disks[]){
     } else if (N == 5){
         //Check if winning state
         if (column2_hard[0] == 20 && column2_hard[1] == 30 && column2_hard[2] == 50 && column2_hard[3] == 70 && column2_hard[4] == 90) {
-            win = true;
+			//if last disk has stopped moving
+			if (disks[0].y >= 200 || (disks[0].y + 20 >= disks[1].y)){
+            	win = true;
+				animation_complete = true;
+			}
             //Update the best num of move if the numver is less or if best was initially 0
             if (potential_move < best_move_hard || best_move_hard == 0){
                 best_move_hard = potential_move;
@@ -1272,9 +1288,10 @@ void best_move_tracker(struct disk_info disks[]){
         }
     }
     
-    if (win){
+    if (win && animation_complete){
         winning = true;
 		end_screen=true;
+		animation_complete = false; //reset for next game
         //stop the time
         timer->control = 0b1000; //Press on STOP
 
@@ -1283,9 +1300,6 @@ void best_move_tracker(struct disk_info disks[]){
             best_move_easy, best_move_medium, best_move_hard);
         win = false;
     }
-
-    return;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
