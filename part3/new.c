@@ -548,20 +548,49 @@ void draw_start_screen(){
 	draw_text(hard_x, 180, "HARD MODE: PRESS H", 0xFFFF);
 }
 
+//////////////////////////////////////////////////////////
 void draw_end_screen(){
 	int title_length = strlen("TOWER OF HANOI") * 10;
     int message = strlen("GAME COMPLETE!") * 10;
-	int restart_length = strlen("PRESS R TO RESTART") * 10;
 	int score_length = strlen("FINAL SCORE: ") * 10;
+	int best_length = strlen("BEST SCORE: ") * 10;
+	int restart_length = strlen("PRESS R TO RESTART") * 10;
 	
     int title_x = (320 - title_length)/2;
     int message_x = (320 - message)/2;
-	int restart_x = (320 - restart_length)/2;
 	int score_x = (320 - score_length)/2;
+	int best_x = (320 - best_length)/2;
+	int restart_x = (320 - restart_length)/2;
+	
+	int score_num_x = score_x + score_length + 2;
+    int best_num_x = best_x + best_length + 2;
+	
     draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
     draw_text(message_x, 100, "GAME COMPLETE!", 0xFFFF);
-	draw_text(restart_x, 150, "PRESS R TO RESTART", 0xFFFF);
-	draw_text(score_x, 200, "FINAL SCORE: ", 0xFFFF);
+	draw_text(score_x, 130, "FINAL SCORE: ", 0xFFFF);
+	draw_text(best_x, 150, "BEST SCORE: ", 0xFFFF);
+	draw_text(restart_x, 180, "PRESS R TO RESTART", 0xFFFF);
+	
+	//draw the score
+	int tens = num_move/10;
+    int ones = num_move%10;
+    drawLetter(score_num_x, 130, '0'+tens, 0xFFFF);
+    drawLetter(score_num_x+10, 130, '0'+ones, 0xFFFF);
+	
+	//draw the best score
+	int best_score = 0;
+    if (N == 3){
+		best_score = best_move_easy;
+	}else if (N == 4){
+		best_score = best_move_medium;
+	}else if (N == 5){
+		best_score = best_move_hard;
+	}
+	
+	tens = best_score/10;
+    ones = best_score%10;
+    drawLetter(best_num_x, 150, '0'+tens, 0xFFFF);
+    drawLetter(best_num_x+10, 150, '0'+ones, 0xFFFF);
 }
 	
 	
@@ -683,6 +712,7 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char M_array[8] = {0x81,0xC3,0xA5,0x99,0x81,0x81,0x81,0x00};
 	static const unsigned char D_array[8] = {0xFE,0x81,0x81,0x81,0x81,0x81,0xFE,0x00};
 	static const unsigned char C_array[8] = {0x3E,0x40,0x80,0x80,0x80,0x40,0x3E,0x00};
+	static const unsigned char B_array[8] = {0xFE,0x82,0x82,0xFC,0x82,0x82,0xFE,0x00};
 	static const unsigned char zero_array[8] = {0x7E,0x81,0x81,0x81,0x81,0x81,0x7E,0x00};
 	static const unsigned char one_array[8] = {0x18,0x38,0x18,0x18,0x18,0x18,0x7E,0x00};
 	static const unsigned char two_array[8] = {0x7E,0x81,0x01,0x3E,0x40,0x80,0xFF,0x00};
@@ -695,6 +725,7 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char nine_array[8] = {0x7E,0x81,0x81,0x7F,0x01,0x81,0x7E,0x00};
 	static const unsigned char space_array[8]= {0,0,0,0,0,0,0,0};
 	static const unsigned char colon_array[8] = {0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x00};
+	static const unsigned char exclamation_array[8] = {0x18,0x18,0x18,0x18,0x18,0x00,0x18,0x00};
 	const unsigned char *letter;
 	
     switch(c) {
@@ -718,6 +749,7 @@ void drawLetter(int x, int y, char c, short int color){
     	case 'M': letter = M_array; break;
     	case 'D': letter = D_array; break;
 		case 'C': letter = C_array; break;
+		case 'B': letter = B_array; break;
 		case '0': letter = zero_array; break;
 		case '1': letter = one_array; break;
 		case '2': letter = two_array; break;
@@ -730,6 +762,7 @@ void drawLetter(int x, int y, char c, short int color){
 		case '9': letter = nine_array; break;
         case ' ': letter = space_array; break;
 		case ':': letter = colon_array; break;
+		case '!': letter = exclamation_array; break;
         default: return;
 	}
 			
