@@ -545,19 +545,22 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 void draw_start_screen(){
     clear_screen();
     int title_length = strlen("TOWER OF HANOI") * 10;
+	int menu_length = strlen("MAIN MENU") * 10;
 	int easy = strlen("EASY MODE: PRESS E") * 10;
 	int medium = strlen("MEDIUM MODE: PRESS M") * 10;
 	int hard = strlen("HARD MODE: PRESS H") * 10;
 	
     int title_x = (320 - title_length)/2;
+	int menu_x = (320 - menu_length)/2;
 	int easy_x = (320 - easy)/2;
 	int medium_x = (320 - medium)/2;
 	int hard_x = (320 - hard)/2;
 	
     draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
-	draw_text(easy_x, 120, "EASY MODE: PRESS E", 0xFFFF);
+	draw_text(menu_x, 100, "MAIN MENU", 0xFFFF);
+	draw_text(easy_x, 130, "EASY MODE: PRESS E", 0xFFFF);
 	draw_text(medium_x, 150, "MEDIUM MODE: PRESS M", 0xFFFF);
-	draw_text(hard_x, 180, "HARD MODE: PRESS H", 0xFFFF);
+	draw_text(hard_x, 170, "HARD MODE: PRESS H", 0xFFFF);
 }
 
 //////////////////////////////////////////////////////////
@@ -565,7 +568,7 @@ void draw_end_screen(){
 	int title_length = strlen("TOWER OF HANOI") * 10;
     int message = strlen("GAME COMPLETE!") * 10;
 	int score_length = strlen("FINAL SCORE: ") * 10;
-	int restart_length = strlen("PRESS R TO RESTART") * 10;
+	int restart_length = strlen("RETURN TO MAIN MENU: PRESS R") * 10;
 	
 	int best_easy_length = strlen("BEST SCORE <EASY>: ") * 10;
     int best_medium_length = strlen("BEST SCORE <MEDIUM>: ") * 10;
@@ -579,9 +582,9 @@ void draw_end_screen(){
 	int score_num_x = score_x + score_length + 2;
 	
     draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
-    draw_text(message_x, 100, "GAME COMPLETE!", 0xFFFF);
+    draw_text(message_x, 110, "GAME COMPLETE!", 0xFFFF);
 	draw_text(score_x, 130, "FINAL SCORE: ", 0xFFFF);
-	draw_text(restart_x, 180, "PRESS R TO RESTART", 0xFFFF);
+	draw_text(restart_x, 190, "RETURN TO MAIN MENU: PRESS R", 0xFFFF);
 	
 	//draw the score
 	int tens = num_move/10;
