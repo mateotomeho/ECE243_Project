@@ -344,13 +344,9 @@ int main(void){
 				}
 			}
 			continue;
-		}else if (end_screen){
+		}else if (end_screen || losing){
 			clear_screen();
-			//if (winning){
-            	draw_end_screen();
-			//}else if (losing){
-			//	draw_lose_screen();
-			//}
+            draw_end_screen();
             wait_for_vsync();
             pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 			
@@ -361,6 +357,7 @@ int main(void){
 				//end_screen = false;
             	//start_screen = true;
             	restart = true;
+                time = 90;
             	//restart_game(disks);
         	}
 			if(restart){
@@ -387,7 +384,8 @@ int main(void){
             	}
         	} 
         	pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
-		
+
+            /*
         	//Music for winning or losing
         	if (once == 0){
             	if (N == 3){
@@ -424,7 +422,7 @@ int main(void){
                     	once = 1;
                 	} 
             	}  
-        	}
+        	}*/
 		}
     }
 }
@@ -560,12 +558,12 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     if (delay_sec() == true){
         time --;
 
-        //Reset time if reach 0
+        //Make sure the time doesn't go below 0
         if (time < 0){
-        time = 90;
+        time = 0;
         }
     }
-
+    /*
     //Music for winning or losing
     if (once == 0){
         if ((winning && disks[0].y == 160)|| losing){
@@ -578,7 +576,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
             }
             once = 1;
         }     
-    }
+    }*/
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -755,6 +753,16 @@ void draw_end_screen(){
 	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xB81F);
     draw_line(box_right, box_top, box_right, box_bottom, 0xB81F);
 	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xB81F);
+
+    if (once == 1 && winning == true){
+        play_audio(victory, numVictory);
+        once ++;
+    } else if (once == 1 && losing == true){
+        play_audio(sad, numSad);
+        once ++;
+    }
+    once ++; //skip the first time so vsinc can change the background then play once 
+
 }
 	
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1541,9 +1549,9 @@ void restart_game(struct disk_info disks[]){
     unsigned char restart_input = 0;
     read_keyboard(&restart_input);
     restart = false;
-	winning = false;
-	losing = false;
-	once = 0;
+	//winning = false;
+	//losing = false;
+	//once = 0;
 
     if (restart_input == 0x2D){//check if r is pressed
 		restart = true;
@@ -1556,6 +1564,9 @@ void restart_game(struct disk_info disks[]){
 		num_move = 0;
 		time = 90;
 		setup_timer();
+        winning = false;
+        losing = false;
+        once = 0;
 		
         //Get the mode
         volatile int * SW_ptr = (volatile int *) SW_BASE;
@@ -1661,6 +1672,9 @@ void restart_game(struct disk_info disks[]){
             disks[i].y = 20 + i*40;
             //printf("Disk %d: x = %d, y = %d\n", i, disks[i].x, disks[i].y);
         }
+        
+        timer->control = 0b0110; //Start the timer + CONT
+
 
         //Restart num_move
         //num_move = 0;
