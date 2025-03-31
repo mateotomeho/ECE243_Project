@@ -1497,6 +1497,9 @@ void update_disk_position(struct disk_info disks[], int index) {
 //Increment the number of move by one + display it 
 int num_move_tracker(int num_move){
     num_move = num_move + 1;
+    if (num_move > 99){
+        num_move = 99; //Cap the number of move to 99 
+    }
     return num_move;
 
 }
