@@ -16,7 +16,6 @@
 #define COUNTER_DELAY 100000000 //number that we'll count simce 100MHz
 
 
-
 volatile int pixel_buffer_start; // global variable
 short int Buffer1[240][512]; // 240 rows, 512 (320 + padding) columns
 short int Buffer2[240][512];
@@ -105,7 +104,6 @@ bool start_screen = true;
 bool end_screen = false;
 bool restart = false;
 int once = 0;
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //Function declaration
@@ -238,7 +236,7 @@ int main(void){
         			disks[1].colour = colour_array[2];  // Medium (Green)
         			disks[2].colour = colour_array[1];  // Large (Red)
 					
-					// Reset columns
+					//reset columns
                     for (int i = 0; i < 5; i++){
                         column0[i] = column1[i] = column2[i] = 0;
                         column0_medium[i] = column1_medium[i] = column2_medium[i] = 0;
@@ -249,9 +247,9 @@ int main(void){
                         column0[i] = disks[i].size;
                     }
 					
-                    // Reset positions
+                    // reset positions
                     for (int i = 0; i < N; i++){
-                        disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
+                        disks[i].x = rod_positions[0] - ((disks[i].size)/2);
                         disks[i].y = 20 + i*40;
                         disks[i].column = 0;
                     }
@@ -278,7 +276,7 @@ int main(void){
         			disks[2].colour = colour_array[2];  // Medium (Green)
         			disks[3].colour = colour_array[1];  // Large (Red)
 				
-					// Reset columns
+					//reset columns
                 	for (int i = 0; i < 5; i++){
                     	column0[i] = column1[i] = column2[i] = 0;
                     	column0_medium[i] = column1_medium[i] = column2_medium[i] = 0;
@@ -289,9 +287,9 @@ int main(void){
                     	column0_medium[i] = disks[i].size;
                 	}
 				
-                	// Reset positions
+                	//reset positions
                 	for (int i = 0; i < N; i++){
-                    	disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
+                    	disks[i].x = rod_positions[0] - ((disks[i].size)/2);
                     	disks[i].y = 20 + i*40;
                     	disks[i].column = 0;
                 	}
@@ -321,7 +319,7 @@ int main(void){
         			disks[3].colour = colour_array[2];  // Medium (Green)
         			disks[4].colour = colour_array[1];  // Large (Red)
 					
-					// Reset columns
+					// reset columns
                     for (int i = 0; i < 5; i++){
                         column0[i] = column1[i] = column2[i] = 0;
                         column0_medium[i] = column1_medium[i] = column2_medium[i] = 0;
@@ -332,9 +330,9 @@ int main(void){
                         column0_hard[i] = disks[i].size;
                     }
 					
-                    // Reset positions
+                    // reset positions
                     for (int i = 0; i < N; i++){
-                        disks[i].x = rod_positions[0] - ((disks[i].size) / 2);
+                        disks[i].x = rod_positions[0] - ((disks[i].size)/2);
                         disks[i].y = 20 + i*40;
                         disks[i].column = 0;
                     }
@@ -653,7 +651,7 @@ void draw_start_screen(){
 	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xB81F);
 }
 
-//////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void draw_end_screen(){
 	clear_screen();
 	int title_length = strlen("tower of hanoi") * 10;
@@ -692,7 +690,6 @@ void draw_end_screen(){
 	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xF81F);
     draw_line(box_right, box_top, box_right, box_bottom, 0xF81F);
 	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xF81F);
-	
 	
     draw_text(title_x, 40, "tower of hanoi", 0xFFFF);
 	draw_text(restart_x, 190, "RETURN TO MAIN MENU:        ", 0xFFFF);
@@ -745,7 +742,6 @@ void draw_end_screen(){
     drawLetter(best_num_x, 138, '0'+tens, 0x07E0);
     drawLetter(best_num_x+10, 138, '0'+ones, 0x07E0);
 	
-	
 	//draw box around game complete and best score
 	box_left = best_text_x - 12;
     box_right = best_text_x + box + 10;
@@ -771,7 +767,6 @@ void draw_end_screen(){
         once ++;
     }
     once ++; //skip the first time so vsinc can change the background then play once 
-
 }
 	
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -871,6 +866,8 @@ void drawBars(){
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////
+//Some of these array codes were figured out with using the help of chatgpt
+//the arrays say where the pixels for each letter/char should be drawn in a 8x8
 void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char T_array[8] = {0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x00};
 	static const unsigned char O_array[8] = {0x7E,0x81,0x81,0x81,0x81,0x81,0x7E,0x00};
@@ -992,6 +989,7 @@ void drawLetter(int x, int y, char c, short int color){
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////
+//draws the text sentences
 void draw_text(int x, int y, const char *s, short int color) {
     while(*s) {
         drawLetter(x, y, *s++, color);
@@ -1241,6 +1239,7 @@ bool add_disk_column(struct disk_info disk, int direction){
     return false;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//this draws the outline for the disks when they are selected by the switches
 void outline_disk(struct disk_info disk, short int color){
     draw_line(disk.x, disk.y, disk.x + disk.size - 1, disk.y, color);
     draw_line(disk.x, disk.y + 1, disk.x + disk.size - 1, disk.y + 1, color);
@@ -1331,7 +1330,6 @@ void delete_disk_column(struct disk_info disk){
 }
 /////////////////////////////////////////////////////////////////////////////////////
 //Create the direction pattern to go left, center, right
-
 void direction_rods(struct disk_info disks[], int index, int direction) {
     if (N == 3){ //easy mode
         if (index == 0b001){
@@ -1497,9 +1495,6 @@ void update_disk_position(struct disk_info disks[], int index) {
 //Increment the number of move by one + display it 
 int num_move_tracker(int num_move){
     num_move = num_move + 1;
-    if (num_move > 99){
-        num_move = 99; //Cap the number of move to 99 
-    }
     return num_move;
 
 }
@@ -1830,13 +1825,6 @@ void plot_pixel(int x, int y, short int line_color)
         
         *one_pixel_address = line_color;
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //AUDIO//
