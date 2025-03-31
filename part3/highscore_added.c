@@ -437,9 +437,9 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 	drawBars();
 	
 	//draw the text for during game
-	int title = strlen("TOWER OF HANOI") * 10;
+	int title = strlen("tower of hanoi") * 10;
 	int start_Xcoord = (320 - title) / 2;
-	draw_text(start_Xcoord, 20, "TOWER OF HANOI", 0xFFFF);
+	draw_text(start_Xcoord, 20, "tower of hanoi", 0xFFFF);
 	
 	int score = strlen("SCORE:") * 10;
 	int score_Xcoord = (320 - (score+20))/2;
@@ -561,7 +561,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 //////////////////////////////////////////////////////////////////////////////////
 void draw_start_screen(){
     clear_screen();
-    int title_length = strlen("TOWER OF HANOI") * 10;
+    int title_length = strlen("tower of hanoi") * 10;
 	int menu_length = strlen("MAIN MENU") * 10;
 	int easy = strlen("EASY MODE: PRESS E") * 10;
 	int medium = strlen("MEDIUM MODE: PRESS M") * 10;
@@ -573,7 +573,7 @@ void draw_start_screen(){
 	int medium_x = (320 - medium)/2;
 	int hard_x = (320 - hard)/2;
 	
-    draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
+    draw_text(title_x, 60, "tower of hanoi", 0xFFFF);
 	draw_text(menu_x, 100, "MAIN MENU", 0xFFFF);
 	draw_text(easy_x, 130, "EASY MODE: PRESS E", 0xFFFF);
 	draw_text(medium_x, 150, "MEDIUM MODE: PRESS M", 0xFFFF);
@@ -582,7 +582,7 @@ void draw_start_screen(){
 
 //////////////////////////////////////////////////////////
 void draw_end_screen(){
-	int title_length = strlen("TOWER OF HANOI") * 10;
+	int title_length = strlen("tower of hanoi") * 10;
     int message = strlen("GAME COMPLETE!") * 10;
 	int score_length = strlen("FINAL SCORE: ") * 10;
 	int restart_length = strlen("RETURN TO MAIN MENU: PRESS R") * 10;
@@ -598,7 +598,7 @@ void draw_end_screen(){
 	
 	int score_num_x = score_x + score_length + 2;
 	
-    draw_text(title_x, 60, "TOWER OF HANOI", 0xFFFF);
+    draw_text(title_x, 60, "tower of hanoi", 0xFFFF);
     draw_text(message_x, 110, "GAME COMPLETE!", 0xFFFF);
 	draw_text(score_x, 130, "FINAL SCORE: ", 0xFFFF);
 	draw_text(restart_x, 190, "RETURN TO MAIN MENU: PRESS R", 0xFFFF);
@@ -775,6 +775,17 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char right_arrow_array[8] = {0x08,0x0C,0x0E,0xFF,0x0E,0x0C,0x08,0x00};
 	static const unsigned char left_arrow_array[8] = {0x10,0x30,0x70,0xFF,0x70,0x30,0x10,0x00};
 	static const unsigned char down_arrow_array[8]  = {0x18,0x18,0x18,0x18,0xFF,0x7E,0x3C,0x18};
+	
+	static const unsigned char T_wide[8] = {0xFF,0xFF,0x18,0x18,0x18,0x18,0x18,0x18};
+    static const unsigned char O_wide[8] = {0x7E,0xFF,0xC3,0xC3,0xC3,0xC3,0xFF,0x7E};
+    static const unsigned char W_wide[8] = {0xC3,0xC3,0xC3,0xC3,0xDB,0xDB,0x66,0x66};
+    static const unsigned char E_wide[8] = {0xFF,0xFF,0xC0,0xFE,0xFE,0xC0,0xFF,0xFF};
+    static const unsigned char R_wide[8] = {0xFC,0xFE,0xC6,0xFC,0xF8,0xCC,0xC6,0xC3};
+    static const unsigned char F_wide[8] = {0xFF,0xFF,0xC0,0xFC,0xFC,0xC0,0xC0,0xC0};
+    static const unsigned char H_wide[8] = {0xC3,0xC3,0xC3,0xFF,0xFF,0xC3,0xC3,0xC3};
+    static const unsigned char A_wide[8] = {0x3C,0x7E,0xC3,0xC3,0xFF,0xFF,0xC3,0xC3};
+    static const unsigned char N_wide[8] = {0xC3,0xE3,0xF3,0xDB,0xCF,0xC7,0xC3,0xC3};
+    static const unsigned char I_wide[8] = {0xFF,0xFF,0x18,0x18,0x18,0x18,0xFF,0xFF};
 	const unsigned char *letter;
 	
     switch(c) {
@@ -817,6 +828,17 @@ void drawLetter(int x, int y, char c, short int color){
 		case 'Z': letter = right_arrow_array; break;
 		case 'X': letter = left_arrow_array; break;
 		case 'V': letter = down_arrow_array; break;
+			
+		case 't': letter = T_wide; break;
+        case 'o': letter = O_wide; break;
+        case 'w': letter = W_wide; break;
+        case 'e': letter = E_wide; break;
+        case 'r': letter = R_wide; break;
+        case 'f': letter = F_wide; break;
+        case 'h': letter = H_wide; break;
+        case 'a': letter = A_wide; break;
+        case 'n': letter = N_wide; break;
+        case 'i': letter = I_wide; break;
 		
         default: return;
 	}
