@@ -212,7 +212,7 @@ int main(void){
     {
 		if (start_screen) {
         	clear_screen();
-        	draw_end_screen();
+        	draw_start_screen();
         	wait_for_vsync();
         	pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 			
