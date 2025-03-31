@@ -47,15 +47,13 @@ struct audio_t {
 };
 struct audio_t *const audiop = ((struct audio_t *)AUDIO_BASE);
 
-/*
 int victory[39010] = {
-    0x00000000};
+    0x00000000, 0x00000000};
 int numVictory = 39010;
 
 int sad[36966] = {
-    0x00000000};
+    0x00000000, 0x00000000};
 int numSad = 36966;
-*/
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //Struct for each disks : store location (x,y), direction (x, y), colour
@@ -380,44 +378,43 @@ int main(void){
         	} 
         	pixel_buffer_start = *(pixel_ctrl_ptr + 1); // new back buffer
 		
-		/*
-        //Music for winning or losing
-        if (once == 0){
-            if (N == 3){
-                if ((winning && disks[0].y >= 160)|| losing){
-                    if (winning){
-                        play_audio(victory, numVictory);
-                        winning = false;
-                    } else if (losing){
-                        play_audio(sad, numSad);
-                        losing = false;
-                    }
-                    once = 1;
-                }   
-            } else if (N == 4){
-                if ((winning && disks[0].y >= 140)|| losing){
-                    if (winning){
-                        play_audio(victory, numVictory);
-                        winning = false;
-                    } else if (losing){
-                        play_audio(sad, numSad);
-                        losing = false;
-                    }
-                    once = 1;
-                }                 
-            } else if (N == 5){
-                if ((winning && disks[0].y >= 120)|| losing){
-                    if (winning){
-                        play_audio(victory, numVictory);
-                        winning = false;
-                    } else if (losing){
-                        play_audio(sad, numSad);
-                        losing = false;
-                    }
-                    once = 1;
-                } 
-            }  
-        }*/
+        	//Music for winning or losing
+        	if (once == 0){
+            	if (N == 3){
+                	if ((winning && disks[0].y >= 160)|| losing){
+                    	if (winning){
+                        	play_audio(victory, numVictory);
+                        	winning = false;
+						}else if (losing){
+                        	play_audio(sad, numSad);
+                        	losing = false;
+						}
+                    	once = 1;
+                	}   
+            	}else if (N == 4){
+                	if ((winning && disks[0].y >= 140)|| losing){
+                    	if (winning){
+                        	play_audio(victory, numVictory);
+                        	winning = false;
+                    	}else if (losing){
+                        	play_audio(sad, numSad);
+                        	losing = false;
+                    	}
+                    	once = 1;
+                	}                 
+            	} else if (N == 5){
+                	if ((winning && disks[0].y >= 120)|| losing){
+                    	if (winning){
+                        	play_audio(victory, numVictory);
+                        	winning = false;
+                    	} else if (losing){
+                        	play_audio(sad, numSad);
+                        	losing = false;
+                    	}
+                    	once = 1;
+                	} 
+            	}  
+        	}
 		}
     }
 }
@@ -559,7 +556,6 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         }
     }
 
-    /*
     //Music for winning or losing
     if (once == 0){
         if ((winning && disks[0].y == 160)|| losing){
@@ -572,9 +568,7 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
             }
             once = 1;
         }     
-    }*/
-
-    
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -645,7 +639,9 @@ void draw_start_screen(){
 //////////////////////////////////////////////////////////
 void draw_end_screen(){
 	int title_length = strlen("tower of hanoi") * 10;
-    int message = strlen("GAME COMPLETE!") * 10;
+    int message_win = strlen("GAME COMPLETE!") * 10;
+	int message_lose = strlen("GAME OVER!") * 10;
+	int message2_lose = strlen("YOU RAN OUT OF TIME") * 10;
 	int score_length = strlen("FINAL SCORE: XX") * 10;
 	int restart_length = strlen("RETURN TO MAIN MENU: PRESS R") * 10;
 	
@@ -654,7 +650,9 @@ void draw_end_screen(){
     int best_hard_length = strlen("BEST SCORE <HARD>: XX") * 10;
 	
     int title_x = (320 - title_length)/2;
-    int message_x = (320 - message)/2;
+    int message_win_x = (320 - message_win)/2;
+	int message_lose_x = (320 - message_lose)/2;
+	int message2_lose_x = (320 - message2_lose)/2;
 	int score_x = (320 - score_length)/2;
 	int restart_x = (320 - restart_length)/2;
 	
@@ -679,16 +677,22 @@ void draw_end_screen(){
 	
 	
     draw_text(title_x, 40, "tower of hanoi", 0xFFFF);
-    draw_text(message_x, 94, "GAME COMPLETE!", 0x07FF);
-	draw_text(score_x, 118, "FINAL SCORE: ", 0xFFFF);
 	draw_text(restart_x, 190, "RETURN TO MAIN MENU:        ", 0xFFFF);
 	draw_text(restart_x, 190, "                     PRESS R", 0x07FF);
 	
-	//draw the score
 	int tens = num_move/10;
     int ones = num_move%10;
-    drawLetter(score_num_x, 118, '0'+tens, 0x07E0);
-    drawLetter(score_num_x+10, 118, '0'+ones, 0x07E0);
+	
+	if(losing){
+		draw_text(message_lose_x, 95, "GAME OVER!", 0x07FF);
+		draw_text(message2_lose_x, 115, "YOU RAN OUT OF TIME", 0x07FF);
+	}else if (winning){
+		//draw the score
+    	draw_text(message_win_x, 94, "GAME COMPLETE!", 0x07FF);
+		draw_text(score_x, 118, "FINAL SCORE: ", 0xFFFF);
+		drawLetter(score_num_x, 118, '0'+tens, 0x07E0);
+    	drawLetter(score_num_x+10, 118, '0'+ones, 0x07E0);
+	}
 	
 	//draw the best score
 	int best_score = 0;
@@ -1681,8 +1685,10 @@ bool delay_sec(){
 }
 
 void no_more_time(){
-    if (time == 0){
+    if (time <= 0 && !end_screen){
         losing = true;
+		end_screen = true;
+		timer->control = 0b1000; //stop timer
     }
 }
 
