@@ -134,6 +134,7 @@ bool delay_sec();
 void no_more_time();
 void play_audio(int *samples, int numSamples);
 void draw_end_screen();
+void draw_lose_screen();
 
 
 int main(void){
@@ -343,7 +344,11 @@ int main(void){
 			continue;
 		}else if (end_screen){
 			clear_screen();
-            draw_end_screen();
+			//if (winning){
+            	draw_end_screen();
+			//}else if (losing){
+			//	draw_lose_screen();
+			//}
             wait_for_vsync();
             pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 			
@@ -351,11 +356,14 @@ int main(void){
 			read_keyboard(&restart_input);
 			
 			if(restart_input == 0x2D){
-				end_screen = false;
-            	start_screen = true;
+				//end_screen = false;
+            	//start_screen = true;
             	restart = true;
-            	restart_game(disks);
+            	//restart_game(disks);
         	}
+			if(restart){
+				restart_game(disks);
+			}
 			continue;
 		}else{
 		
@@ -467,15 +475,15 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 	drawLetter(score_Xcoord+score+12, 68,'0'+ones, 0xFFFF);
 	
 	//draw the minimum score achievable
-	int min_score = strlen("MINIMUM SCORE:07") * 10;
+	int min_score = strlen("MINIMUM SCORE POSSIBLE:07") * 10;
 	int min_score_x = (320 - min_score)/2;
 	
 	if (N == 3){ //easy
-		draw_text(min_score_x, 50, "MINIMUM SCORE:07", 0xFFFF);
+		draw_text(min_score_x, 50, "MINIMUM SCORE POSSIBLE:07", 0xFFFF);
 	}else if (N == 4){ //med
-    	draw_text(min_score_x, 50, "MINIMUM SCORE:15", 0xFFFF);
+    	draw_text(min_score_x, 50, "MINIMUM SCORE POSSIBLE:15", 0xFFFF);
 	}else{ //hard
-    	draw_text(min_score_x, 50, "MINIMUM SCORE:31", 0xFFFF);
+    	draw_text(min_score_x, 50, "MINIMUM SCORE POSSIBLE:31", 0xFFFF);
 	}
 	
 	//draw arrows for user instructions
@@ -561,10 +569,10 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
         if ((winning && disks[0].y == 160)|| losing){
             if (winning){
                 play_audio(victory, numVictory);
-                winning = false;
+                //winning = false;
             } else if (losing){
                 play_audio(sad, numSad);
-                losing = false;
+                //losing = false;
             }
             once = 1;
         }     
@@ -638,12 +646,13 @@ void draw_start_screen(){
 
 //////////////////////////////////////////////////////////
 void draw_end_screen(){
+	clear_screen();
 	int title_length = strlen("tower of hanoi") * 10;
     int message_win = strlen("GAME COMPLETE!") * 10;
 	int message_lose = strlen("GAME OVER!") * 10;
 	int message2_lose = strlen("YOU RAN OUT OF TIME") * 10;
 	int score_length = strlen("FINAL SCORE: XX") * 10;
-	int restart_length = strlen("RETURN TO MAIN MENU: PRESS R") * 10;
+	int restart_length = strlen("RETURN TO MAIN MENU: HOLD R") * 10;
 	
 	int best_easy_length = strlen("BEST SCORE <EASY>: XX") * 10;
     int best_medium_length = strlen("BEST SCORE <MEDIUM>: XX") * 10;
@@ -678,21 +687,17 @@ void draw_end_screen(){
 	
     draw_text(title_x, 40, "tower of hanoi", 0xFFFF);
 	draw_text(restart_x, 190, "RETURN TO MAIN MENU:        ", 0xFFFF);
-	draw_text(restart_x, 190, "                     PRESS R", 0x07FF);
+	draw_text(restart_x, 190, "                     HOLD R", 0x07FF);
 	
 	int tens = num_move/10;
     int ones = num_move%10;
 	
-	if(losing){
-		draw_text(message_lose_x, 95, "GAME OVER!", 0x07FF);
-		draw_text(message2_lose_x, 115, "YOU RAN OUT OF TIME", 0x07FF);
-	}else if (winning){
-		//draw the score
-    	draw_text(message_win_x, 94, "GAME COMPLETE!", 0x07FF);
-		draw_text(score_x, 118, "FINAL SCORE: ", 0xFFFF);
-		drawLetter(score_num_x, 118, '0'+tens, 0x07E0);
-    	drawLetter(score_num_x+10, 118, '0'+ones, 0x07E0);
-	}
+
+	//draw the score
+    draw_text(message_win_x, 94, "GAME COMPLETE!", 0x07FF);
+	draw_text(score_x, 118, "FINAL SCORE: ", 0xFFFF);
+	drawLetter(score_num_x, 118, '0'+tens, 0x07E0);
+    drawLetter(score_num_x+10, 118, '0'+ones, 0x07E0);
 	
 	//draw the best score
 	int best_score = 0;
@@ -717,7 +722,110 @@ void draw_end_screen(){
 	}else if (N == 5){
 		best_score = best_move_hard;
 		best_text_x = (320 - best_hard_length)/2;
-        draw_text(best_text_x, 138, "BEST SCORE <HARD>: ", 0xFFFF);
+        draw_text(best_text_x, 138, "BEST SCORE       : ", 0xFFFF);
+		draw_text(best_text_x, 138, "           <HARD>  ", 0xF827);
+        best_num_x = best_text_x + best_hard_length + 2-30;
+		box=best_hard_length;
+	}
+	
+	tens = best_score/10;
+    ones = best_score%10;
+    drawLetter(best_num_x, 138, '0'+tens, 0x07E0);
+    drawLetter(best_num_x+10, 138, '0'+ones, 0x07E0);
+	
+	
+	//draw box around game complete and best score
+	box_left = best_text_x - 12;
+    box_right = best_text_x + box + 10;
+	box_top = 90 - 10;
+	box_bottom = 140 + 8 + 10;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xB81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xB81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xB81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xB81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xB81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xB81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xB81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xB81F);
+}
+
+void draw_lose_screen(){
+	clear_screen();
+	int title_length = strlen("tower of hanoi") * 10;
+    int message_win = strlen("GAME COMPLETE!") * 10;
+	int message_lose = strlen("GAME OVER!") * 10;
+	int message2_lose = strlen("YOU RAN OUT OF TIME") * 10;
+	int score_length = strlen("FINAL SCORE: XX") * 10;
+	int restart_length = strlen("RETURN TO MAIN MENU: HOLD R") * 10;
+	
+	int best_easy_length = strlen("BEST SCORE <EASY>: XX") * 10;
+    int best_medium_length = strlen("BEST SCORE <MEDIUM>: XX") * 10;
+    int best_hard_length = strlen("BEST SCORE <HARD>: XX") * 10;
+	
+    int title_x = (320 - title_length)/2;
+    int message_win_x = (320 - message_win)/2;
+	int message_lose_x = (320 - message_lose)/2;
+	int message2_lose_x = (320 - message2_lose)/2;
+	int score_x = (320 - score_length)/2;
+	int restart_x = (320 - restart_length)/2;
+	
+	int score_num_x = score_x + score_length + 2 - 30;
+	
+	//draw box around tower of hanoi
+	int box_left = title_x - 8;
+    int box_right = title_x + title_length + 6;
+	int box_top = 40 - 6;
+	int box_bottom = 40 + 8 + 6;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xF81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xF81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xF81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xF81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xF81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xF81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xF81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xF81F);
+	
+	
+    draw_text(title_x, 40, "tower of hanoi", 0xFFFF);
+	draw_text(restart_x, 190, "RETURN TO MAIN MENU:        ", 0xFFFF);
+	draw_text(restart_x, 190, "                     HOLD R", 0x07FF);
+	
+	int tens = num_move/10;
+    int ones = num_move%10;
+	
+	draw_text(message_lose_x, 95, "GAME OVER!", 0xF827);
+	draw_text(message2_lose_x, 115, "YOU RAN OUT OF TIME", 0xF827);
+	
+	//draw the best score
+	int best_score = 0;
+	int best_text_x;
+	int best_num_x;
+	int box=0; //box length
+	
+    if (N == 3){
+		best_score = best_move_easy;
+		best_text_x = (320 - best_easy_length)/2;
+        draw_text(best_text_x, 138, "BEST SCORE       : ", 0xFFFF);
+		draw_text(best_text_x, 138, "           <EASY>  ", 0x07E0);
+        best_num_x = best_text_x + best_easy_length + 2 -30;
+		box=best_easy_length;
+	}else if (N == 4){
+		best_score = best_move_medium;
+		best_text_x = (320 - best_medium_length)/2;
+        draw_text(best_text_x, 138, "BEST SCORE         : ", 0xFFFF);
+		draw_text(best_text_x, 138, "           <MEDIUM>  ", 0xFFE0);
+        best_num_x = best_text_x + best_medium_length + 2-30;
+		box=best_medium_length;
+	}else if (N == 5){
+		best_score = best_move_hard;
+		best_text_x = (320 - best_hard_length)/2;
+        draw_text(best_text_x, 138, "BEST SCORE       : ", 0xFFFF);
 		draw_text(best_text_x, 138, "           <HARD>  ", 0xF827);
         best_num_x = best_text_x + best_hard_length + 2-30;
 		box=best_hard_length;
@@ -1536,15 +1644,18 @@ void restart_game(struct disk_info disks[]){
 	losing = false;
 	once = 0;
 
-    if (restart_input == 0x2D){ //Check if user press R
-        restart = true;
-    }
+    if (restart_input == 0x2D){//check if r is pressed
+		restart = true;
+	}
 
     //If restart, reinitalize everything : column, disk position, score
     if (restart){
 		end_screen = false;
 		start_screen = true;
 		num_move = 0;
+		time = 90;
+		setup_timer();
+		
         //Get the mode
         volatile int * SW_ptr = (volatile int *) SW_BASE;
         int mode = (*SW_ptr) & 0b1100000000; //Get SW[9]
@@ -1651,16 +1762,17 @@ void restart_game(struct disk_info disks[]){
         }
 
         //Restart num_move
-        num_move = 0;
+        //num_move = 0;
 
         //Restart the time
-        time = 90;
-        timer->control = 0b0110; //Start the timer + CONT
+        //time = 90;
+		//setup_timer();
+        /*timer->control = 0b0110; //Start the timer + CONT
 
         //Restart the bool for win or losing
         winning = false;
         losing = false;
-        once = 0;
+        once = 0;*/
 
     }
 }
