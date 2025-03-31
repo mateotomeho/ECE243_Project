@@ -212,7 +212,7 @@ int main(void){
     {
 		if (start_screen) {
         	clear_screen();
-        	draw_start_screen();
+        	draw_end_screen();
         	wait_for_vsync();
         	pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 			
@@ -436,30 +436,49 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
     //Draw the 3 rods for the game
 	drawBars();
 	
+	
 	//draw the text for during game
 	int title = strlen("tower of hanoi") * 10;
 	int start_Xcoord = (320 - title) / 2;
-	draw_text(start_Xcoord, 20, "tower of hanoi", 0xFFFF);
+	draw_text(start_Xcoord, 23, "tower of hanoi", 0xFFFF);
+	
+	//draw box around tower of hanoi
+	int box_left = start_Xcoord - 8;
+    int box_right = start_Xcoord + title + 6;
+	int box_top = 23 - 6;
+	int box_bottom = 23 + 8 + 6;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xF81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xF81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xF81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xF81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xF81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xF81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xF81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xF81F);
+	
 	
 	int score = strlen("SCORE:") * 10;
 	int score_Xcoord = (320 - (score+20))/2;
-	draw_text(score_Xcoord, 60, "SCORE:", 0xFFFF);
+	draw_text(score_Xcoord, 68, "SCORE:", 0xFFFF);
 	//draw the two‑digit move count
 	int tens = num_move/10;
 	int ones = num_move%10;
-	drawLetter(score_Xcoord+score+2, 60,'0'+tens, 0xFFFF);
-	drawLetter(score_Xcoord+score+12, 60,'0'+ones, 0xFFFF);
+	drawLetter(score_Xcoord+score+2, 68,'0'+tens, 0xFFFF);
+	drawLetter(score_Xcoord+score+12, 68,'0'+ones, 0xFFFF);
 	
 	//draw the minimum score achievable
 	int min_score = strlen("MINIMUM SCORE:07") * 10;
 	int min_score_x = (320 - min_score)/2;
 	
 	if (N == 3){ //easy
-		draw_text(min_score_x, 40, "MINIMUM SCORE:07", 0xFFFF);
+		draw_text(min_score_x, 50, "MINIMUM SCORE:07", 0xFFFF);
 	}else if (N == 4){ //med
-    	draw_text(min_score_x, 40, "MINIMUM SCORE:15", 0xFFFF);
+    	draw_text(min_score_x, 50, "MINIMUM SCORE:15", 0xFFFF);
 	}else{ //hard
-    	draw_text(min_score_x, 40, "MINIMUM SCORE:31", 0xFFFF);
+    	draw_text(min_score_x, 50, "MINIMUM SCORE:31", 0xFFFF);
 	}
 	
 	//draw arrows for user instructions
@@ -577,70 +596,151 @@ void draw_start_screen(){
 	int medium_x = (320 - medium)/2;
 	int hard_x = (320 - hard)/2;
 	
-    draw_text(title_x, 50, "tower of hanoi", 0xFFFF);
-	draw_text(objective_x, 80, "OBJECTIVE: MOVE ALL", 0xFFFF);
-	draw_text(objective2_x, 95, "DISKS TO TOWER 3", 0xFFFF);
-	draw_text(menu_x, 130, "MAIN MENU", 0xFFFF);
-	draw_text(easy_x, 150, "EASY MODE: PRESS E", 0xFFFF);
-	draw_text(medium_x, 170, "MEDIUM MODE: PRESS M", 0xFFFF);
-	draw_text(hard_x, 190, "HARD MODE: PRESS H", 0xFFFF);
+	//draw box around tower of hanoi
+	int box_left = title_x - 8;
+    int box_right = title_x + title_length + 6;
+	int box_top = 40 - 6;
+	int box_bottom = 40 + 8 + 6;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xF81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xF81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xF81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xF81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xF81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xF81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xF81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xF81F);
+	
+    draw_text(title_x, 40, "tower of hanoi", 0xFFFF);
+	draw_text(menu_x, 88, "MAIN MENU", 0x07FF);
+	draw_text(easy_x, 111, "EASY MODE:        ", 0xFFFF);
+	draw_text(easy_x, 111, "           PRESS E", 0x07E0);
+	draw_text(medium_x, 130, "MEDIUM MODE:        ", 0xFFFF);
+	draw_text(medium_x, 130, "             PRESS M", 0xFFE0);
+	draw_text(hard_x, 149, "HARD MODE:        ", 0xFFFF);
+	draw_text(hard_x, 149, "           PRESS H", 0xF827);
+	draw_text(objective_x, 190, "OBJECTIVE: MOVE ALL", 0x07FF);
+	draw_text(objective2_x, 205, "DISKS TO TOWER 3", 0x07FF);
+	
+	//draw box around main menu
+	box_left = medium_x - 14;
+    box_right = medium_x + medium + 12;
+	box_top = 88 - 12;
+	box_bottom = 150 + 8 + 12;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xB81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xB81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xB81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xB81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xB81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xB81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xB81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xB81F);
 }
 
 //////////////////////////////////////////////////////////
 void draw_end_screen(){
 	int title_length = strlen("tower of hanoi") * 10;
     int message = strlen("GAME COMPLETE!") * 10;
-	int score_length = strlen("FINAL SCORE: ") * 10;
+	int score_length = strlen("FINAL SCORE: XX") * 10;
 	int restart_length = strlen("RETURN TO MAIN MENU: PRESS R") * 10;
 	
-	int best_easy_length = strlen("BEST SCORE <EASY>: ") * 10;
-    int best_medium_length = strlen("BEST SCORE <MEDIUM>: ") * 10;
-    int best_hard_length = strlen("BEST SCORE <HARD>: ") * 10;
+	int best_easy_length = strlen("BEST SCORE <EASY>: XX") * 10;
+    int best_medium_length = strlen("BEST SCORE <MEDIUM>: XX") * 10;
+    int best_hard_length = strlen("BEST SCORE <HARD>: XX") * 10;
 	
     int title_x = (320 - title_length)/2;
     int message_x = (320 - message)/2;
 	int score_x = (320 - score_length)/2;
 	int restart_x = (320 - restart_length)/2;
 	
-	int score_num_x = score_x + score_length + 2;
+	int score_num_x = score_x + score_length + 2 - 30;
 	
-    draw_text(title_x, 60, "tower of hanoi", 0xFFFF);
-    draw_text(message_x, 110, "GAME COMPLETE!", 0xFFFF);
-	draw_text(score_x, 130, "FINAL SCORE: ", 0xFFFF);
-	draw_text(restart_x, 190, "RETURN TO MAIN MENU: PRESS R", 0xFFFF);
+	//draw box around tower of hanoi
+	int box_left = title_x - 8;
+    int box_right = title_x + title_length + 6;
+	int box_top = 40 - 6;
+	int box_bottom = 40 + 8 + 6;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xF81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xF81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xF81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xF81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xF81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xF81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xF81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xF81F);
+	
+	
+    draw_text(title_x, 40, "tower of hanoi", 0xFFFF);
+    draw_text(message_x, 94, "GAME COMPLETE!", 0x07FF);
+	draw_text(score_x, 118, "FINAL SCORE: ", 0xFFFF);
+	draw_text(restart_x, 190, "RETURN TO MAIN MENU:        ", 0xFFFF);
+	draw_text(restart_x, 190, "                     PRESS R", 0x07FF);
 	
 	//draw the score
 	int tens = num_move/10;
     int ones = num_move%10;
-    drawLetter(score_num_x, 130, '0'+tens, 0xFFFF);
-    drawLetter(score_num_x+10, 130, '0'+ones, 0xFFFF);
+    drawLetter(score_num_x, 118, '0'+tens, 0x07E0);
+    drawLetter(score_num_x+10, 118, '0'+ones, 0x07E0);
 	
 	//draw the best score
 	int best_score = 0;
 	int best_text_x;
 	int best_num_x;
+	int box=0; //box length
 	
     if (N == 3){
 		best_score = best_move_easy;
 		best_text_x = (320 - best_easy_length)/2;
-        draw_text(best_text_x, 150, "BEST SCORE <EASY>: ", 0xFFFF);
-        best_num_x = best_text_x + best_easy_length + 2;
+        draw_text(best_text_x, 138, "BEST SCORE       : ", 0xFFFF);
+		draw_text(best_text_x, 138, "           <EASY>  ", 0x07E0);
+        best_num_x = best_text_x + best_easy_length + 2 -30;
+		box=best_easy_length;
 	}else if (N == 4){
 		best_score = best_move_medium;
 		best_text_x = (320 - best_medium_length)/2;
-        draw_text(best_text_x, 150, "BEST SCORE <MEDIUM>: ", 0xFFFF);
-        best_num_x = best_text_x + best_medium_length + 2;
+        draw_text(best_text_x, 138, "BEST SCORE         : ", 0xFFFF);
+		draw_text(best_text_x, 138, "           <MEDIUM>  ", 0xFFE0);
+        best_num_x = best_text_x + best_medium_length + 2-30;
+		box=best_medium_length;
 	}else if (N == 5){
 		best_score = best_move_hard;
 		best_text_x = (320 - best_hard_length)/2;
-        draw_text(best_text_x, 150, "BEST SCORE <HARD>: ", 0xFFFF);
-        best_num_x = best_text_x + best_hard_length + 2;
+        draw_text(best_text_x, 138, "BEST SCORE <HARD>: ", 0xFFFF);
+		draw_text(best_text_x, 138, "           <HARD>  ", 0xF827);
+        best_num_x = best_text_x + best_hard_length + 2-30;
+		box=best_hard_length;
 	}
 	
 	tens = best_score/10;
     ones = best_score%10;
-    drawLetter(best_num_x, 150, '0'+tens, 0xFFFF);
-    drawLetter(best_num_x+10, 150, '0'+ones, 0xFFFF);
+    drawLetter(best_num_x, 138, '0'+tens, 0x07E0);
+    drawLetter(best_num_x+10, 138, '0'+ones, 0x07E0);
+	
+	
+	//draw box around game complete and best score
+	box_left = best_text_x - 12;
+    box_right = best_text_x + box + 10;
+	box_top = 90 - 10;
+	box_bottom = 140 + 8 + 10;
+	
+	draw_line(box_left, box_top-1, box_right, box_top-1, 0xB81F);
+	draw_line(box_left, box_top, box_right, box_top, 0xB81F);
+	
+    draw_line(box_left, box_bottom, box_right, box_bottom, 0xB81F);
+	draw_line(box_left, box_bottom+1, box_right, box_bottom+1, 0xB81F);
+	
+    draw_line(box_left, box_top, box_left, box_bottom, 0xB81F);
+	draw_line(box_left-1, box_top, box_left-1, box_bottom, 0xB81F);
+    draw_line(box_right, box_top, box_right, box_bottom, 0xB81F);
+	draw_line(box_right+1, box_top, box_right+1, box_bottom, 0xB81F);
 }
 	
 	
