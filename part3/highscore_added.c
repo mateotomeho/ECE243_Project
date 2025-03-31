@@ -439,18 +439,30 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 	//draw the text for during game
 	int title = strlen("TOWER OF HANOI") * 10;
 	int start_Xcoord = (320 - title) / 2;
-	draw_text(start_Xcoord, 30, "TOWER OF HANOI", 0xFFFF);
+	draw_text(start_Xcoord, 20, "TOWER OF HANOI", 0xFFFF);
 	
 	int score = strlen("SCORE:") * 10;
 	int score_Xcoord = (320 - (score+20))/2;
-	draw_text(score_Xcoord, 50, "SCORE:", 0xFFFF);
+	draw_text(score_Xcoord, 60, "SCORE:", 0xFFFF);
 	//draw the two‑digit move count
 	int tens = num_move/10;
 	int ones = num_move%10;
-	drawLetter(score_Xcoord+score+2, 50,'0'+tens, 0xFFFF);
-	drawLetter(score_Xcoord+score+12, 50,'0'+ones, 0xFFFF);
+	drawLetter(score_Xcoord+score+2, 60,'0'+tens, 0xFFFF);
+	drawLetter(score_Xcoord+score+12, 60,'0'+ones, 0xFFFF);
 	
-	//draw arrows for directions
+	//draw the minimum score achievable
+	int min_score = strlen("MINIMUM SCORE:07") * 10;
+	int min_score_x = (320 - min_score)/2;
+	
+	if (N == 3){ //easy
+		draw_text(min_score_x, 40, "MINIMUM SCORE:07", 0xFFFF);
+	}else if (N == 4){ //med
+    	draw_text(min_score_x, 40, "MINIMUM SCORE:15", 0xFFFF);
+	}else{ //hard
+    	draw_text(min_score_x, 40, "MINIMUM SCORE:31", 0xFFFF);
+	}
+	
+	//draw arrows for user instructions
 	draw_text(51, 90, "X", 0xFFFF); //left arrow
 	draw_text(155, 90, "V", 0xFFFF); //down arrow
 	draw_text(259, 90, "Z", 0xFFFF); //right arrow
