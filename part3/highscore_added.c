@@ -563,8 +563,8 @@ void draw_start_screen(){
     clear_screen();
     int title_length = strlen("tower of hanoi") * 10;
 	int menu_length = strlen("MAIN MENU") * 10;
-	int objective_length = strlen("OBJECTIVE: MOVE ALL DISKS") * 10;
-	int objective2_length = strlen("TO TOWER 3") * 10;
+	int objective_length = strlen("OBJECTIVE: MOVE ALL") * 10;
+	int objective2_length = strlen("DISKS TO TOWER 3") * 10;
 	int easy = strlen("EASY MODE: PRESS E") * 10;
 	int medium = strlen("MEDIUM MODE: PRESS M") * 10;
 	int hard = strlen("HARD MODE: PRESS H") * 10;
@@ -578,8 +578,8 @@ void draw_start_screen(){
 	int hard_x = (320 - hard)/2;
 	
     draw_text(title_x, 50, "tower of hanoi", 0xFFFF);
-	draw_text(objective_x, 80, "OBJECTIVE: MOVE ALL DISKS", 0xFFFF);
-	draw_text(objective2_x, 95, "TO TOWER 3", 0xFFFF);
+	draw_text(objective_x, 80, "OBJECTIVE: MOVE ALL", 0xFFFF);
+	draw_text(objective2_x, 95, "DISKS TO TOWER 3", 0xFFFF);
 	draw_text(menu_x, 130, "MAIN MENU", 0xFFFF);
 	draw_text(easy_x, 150, "EASY MODE: PRESS E", 0xFFFF);
 	draw_text(medium_x, 170, "MEDIUM MODE: PRESS M", 0xFFFF);
