@@ -363,6 +363,7 @@ int main(void){
         	}
 			continue;
 		}else{
+		
         	/* Erase any disk and lines that were drawn in the last iteration */
 			draw(disks, KEY_ptr, SW_ptr);
 		
@@ -441,16 +442,33 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 	//draw the text for during game
 	int title = strlen("TOWER OF HANOI") * 10;
 	int start_Xcoord = (320 - title) / 2;
-	draw_text(start_Xcoord, 30, "TOWER OF HANOI", 0xFFFF);
+	draw_text(start_Xcoord, 20, "TOWER OF HANOI", 0xFFFF);
 	
 	int score = strlen("SCORE:") * 10;
 	int score_Xcoord = (320 - (score+20))/2;
-	draw_text(score_Xcoord, 50, "SCORE:", 0xFFFF);
+	draw_text(score_Xcoord, 60, "SCORE:", 0xFFFF);
 	//draw the two‑digit move count
 	int tens = num_move/10;
 	int ones = num_move%10;
-	drawLetter(score_Xcoord+score+2, 50,'0'+tens, 0xFFFF);
-	drawLetter(score_Xcoord+score+12, 50,'0'+ones, 0xFFFF);
+	drawLetter(score_Xcoord+score+2, 60,'0'+tens, 0xFFFF);
+	drawLetter(score_Xcoord+score+12, 60,'0'+ones, 0xFFFF);
+	
+	//draw the minimum score achievable
+	int min_score = strlen("MINIMUM SCORE:07") * 10;
+	int min_score_x = (320 - min_score)/2;
+	
+	if (N == 3){ //easy
+		draw_text(min_score_x, 40, "MINIMUM SCORE:07", 0xFFFF);
+	}else if (N == 4){ //med
+    	draw_text(min_score_x, 40, "MINIMUM SCORE:15", 0xFFFF);
+	}else{ //hard
+    	draw_text(min_score_x, 40, "MINIMUM SCORE:31", 0xFFFF);
+	}
+	
+	//draw arrows for user instructions
+	draw_text(51, 90, "X", 0xFFFF); //left arrow
+	draw_text(155, 90, "V", 0xFFFF); //down arrow
+	draw_text(259, 90, "Z", 0xFFFF); //right arrow
 	
     //draw each disk
     for (int index = 0; index < N; index++){
@@ -621,10 +639,14 @@ void draw_end_screen(){
     drawLetter(best_num_x, 150, '0'+tens, 0xFFFF);
     drawLetter(best_num_x+10, 150, '0'+ones, 0xFFFF);
 
+
     if (once == 1 && winning == true){
         play_audio(victory, numVictory);
         once ++;
-    } 
+    } else if (once == 1 && losing == true){
+        play_audio(sad, numSad);
+        once ++;
+    }
     once ++; //skip the first time so vsinc can change the background then play once 
 
 }
@@ -728,7 +750,7 @@ void drawBars(){
 }
 ////////////////////////////////////////////////////////////////////////////////
 void drawLetter(int x, int y, char c, short int color){
-	static const unsigned char T_array[8] = {0xFF,0x10, 0x10,0x10,0x10,0x10,0x10,0x00};
+	static const unsigned char T_array[8] = {0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x00};
 	static const unsigned char O_array[8] = {0x7E,0x81,0x81,0x81,0x81,0x81,0x7E,0x00};
 	static const unsigned char W_array[8] = {0x81,0x81,0x81,0x81,0x5A,0x24,0x24,0x00};
 	static const unsigned char E_array[8] = {0xFF,0x80,0x80,0xFE,0x80,0x80,0xFF,0x00};
@@ -737,7 +759,7 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char H_array[8] = {0x81,0x81,0x81,0xFF,0x81,0x81,0x81,0x00};
 	static const unsigned char A_array[8] = {0x7E,0x81,0x81,0xFF,0x81,0x81,0x81,0x00};
 	static const unsigned char N_array[8] = {0x81,0xC1,0xA1,0x91,0x89,0x85,0x81,0x00};
-	static const unsigned char I_array[8] = {0xFF,0x10,0x10,0x10,0x10,0x10,0xFF,0x00};
+	static const unsigned char I_array[8] = {0xFF,0x18,0x18,0x18,0x18,0x18,0xFF,0x00};
 	static const unsigned char P_array[8] = {0xFE,0x81,0x81,0xFE,0x80,0x80,0x80,0x00};
 	static const unsigned char S_array[8] = {0x7E,0x80,0x80,0x7E,0x01,0x01,0x7E,0x00};
 	static const unsigned char K_array[8] = {0x81,0x82,0x84,0xF8,0x84,0x82,0x81,0x00};
@@ -764,6 +786,9 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char exclamation_array[9] = {0x18,0x18,0x18,0x18,0x18,0x18,0x00,0x18,0x00};
 	static const unsigned char less_than_array[8] = {0x02,0x04,0x08,0x10,0x08,0x04,0x02,0x00};
 	static const unsigned char greater_than_array[8] = {0x40,0x20,0x10,0x08,0x10,0x20,0x40,0x00};
+	static const unsigned char right_arrow_array[8] = {0x08,0x0C,0x0E,0xFF,0x0E,0x0C,0x08,0x00};
+	static const unsigned char left_arrow_array[8] = {0x10,0x30,0x70,0xFF,0x70,0x30,0x10,0x00};
+	static const unsigned char down_arrow_array[8]  = {0x18,0x18,0x18,0x18,0xFF,0x7E,0x3C,0x18};
 	const unsigned char *letter;
 	
     switch(c) {
@@ -803,6 +828,10 @@ void drawLetter(int x, int y, char c, short int color){
 		case '!': letter = exclamation_array; break;
 		case '<': letter = less_than_array; break;
     	case '>': letter = greater_than_array; break;
+		case 'Z': letter = right_arrow_array; break;
+		case 'X': letter = left_arrow_array; break;
+		case 'V': letter = down_arrow_array; break;
+		
         default: return;
 	}
 			
@@ -1383,7 +1412,7 @@ void restart_game(struct disk_info disks[]){
     restart = false;
 	//winning = false;
 	//losing = false;
-    once = 0;
+	once = 0;
 
     if (restart_input == 0x2D){ //Check if user press R
         restart = true;
@@ -1510,6 +1539,7 @@ void restart_game(struct disk_info disks[]){
         winning = false;
         losing = false;
         once = 0;
+
     }
 }
 
