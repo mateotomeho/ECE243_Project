@@ -463,9 +463,9 @@ void draw(struct disk_info disks[], volatile int *KEY_ptr, volatile int *SW_ptr)
 	}
 	
 	//draw arrows for user instructions
-	draw_text(51, 90, "X", 0xFFFF); //left arrow
-	draw_text(155, 90, "V", 0xFFFF); //down arrow
-	draw_text(259, 90, "Z", 0xFFFF); //right arrow
+	draw_text(51, 90, "#", 0xFFFF); //left arrow
+	draw_text(155, 90, "$", 0xFFFF); //down arrow
+	draw_text(259, 90, "@", 0xFFFF); //right arrow
 	
     //draw each disk
     for (int index = 0; index < N; index++){
@@ -563,21 +563,27 @@ void draw_start_screen(){
     clear_screen();
     int title_length = strlen("tower of hanoi") * 10;
 	int menu_length = strlen("MAIN MENU") * 10;
+	int objective_length = strlen("OBJECTIVE: MOVE ALL DISKS") * 10;
+	int objective2_length = strlen("TO TOWER 3") * 10;
 	int easy = strlen("EASY MODE: PRESS E") * 10;
 	int medium = strlen("MEDIUM MODE: PRESS M") * 10;
 	int hard = strlen("HARD MODE: PRESS H") * 10;
 	
     int title_x = (320 - title_length)/2;
+	int objective_x = (320 - objective_length)/2;
+	int objective2_x = (320 - objective2_length)/2;
 	int menu_x = (320 - menu_length)/2;
 	int easy_x = (320 - easy)/2;
 	int medium_x = (320 - medium)/2;
 	int hard_x = (320 - hard)/2;
 	
-    draw_text(title_x, 60, "tower of hanoi", 0xFFFF);
-	draw_text(menu_x, 100, "MAIN MENU", 0xFFFF);
-	draw_text(easy_x, 130, "EASY MODE: PRESS E", 0xFFFF);
-	draw_text(medium_x, 150, "MEDIUM MODE: PRESS M", 0xFFFF);
-	draw_text(hard_x, 170, "HARD MODE: PRESS H", 0xFFFF);
+    draw_text(title_x, 50, "tower of hanoi", 0xFFFF);
+	draw_text(objective_x, 80, "OBJECTIVE: MOVE ALL DISKS", 0xFFFF);
+	draw_text(objective2_x, 95, "TO TOWER 3", 0xFFFF);
+	draw_text(menu_x, 130, "MAIN MENU", 0xFFFF);
+	draw_text(easy_x, 150, "EASY MODE: PRESS E", 0xFFFF);
+	draw_text(medium_x, 170, "MEDIUM MODE: PRESS M", 0xFFFF);
+	draw_text(hard_x, 190, "HARD MODE: PRESS H", 0xFFFF);
 }
 
 //////////////////////////////////////////////////////////
@@ -738,7 +744,7 @@ void drawBars(){
 void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char T_array[8] = {0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x00};
 	static const unsigned char O_array[8] = {0x7E,0x81,0x81,0x81,0x81,0x81,0x7E,0x00};
-	static const unsigned char W_array[8] = {0x81,0x81,0x81,0x81,0x5A,0x24,0x24,0x00};
+	static const unsigned char W_array[8] = {0x81,0x81,0x81,0x81,0x99,0xA5,0x42,0x00};
 	static const unsigned char E_array[8] = {0xFF,0x80,0x80,0xFE,0x80,0x80,0xFF,0x00};
 	static const unsigned char R_array[8] = {0xFE,0x81,0x81,0xFE,0x90,0x88,0x87,0x00};
 	static const unsigned char F_array[8] = {0xFF,0x80,0x80,0xFE,0x80,0x80,0x80,0x00};
@@ -757,6 +763,8 @@ void drawLetter(int x, int y, char c, short int color){
 	static const unsigned char D_array[8] = {0xFE,0x81,0x81,0x81,0x81,0x81,0xFE,0x00};
 	static const unsigned char C_array[8] = {0x3E,0x40,0x80,0x80,0x80,0x40,0x3E,0x00};
 	static const unsigned char B_array[8] = {0xFE,0x82,0x82,0xFC,0x82,0x82,0xFE,0x00};
+	static const unsigned char J_array[8] = {0x7F,0x04,0x04,0x04,0x04,0x44,0x64,0x38};
+	static const unsigned char V_array[8] = {0x41,0x41,0x41,0x41,0x22,0x22,0x14,0x08};
 	static const unsigned char zero_array[8] = {0x7E,0x81,0x81,0x81,0x81,0x81,0x7E,0x00};
 	static const unsigned char one_array[8] = {0x18,0x38,0x18,0x18,0x18,0x18,0x7E,0x00};
 	static const unsigned char two_array[8] = {0x7E,0x81,0x01,0x3E,0x40,0x80,0xFF,0x00};
@@ -810,6 +818,8 @@ void drawLetter(int x, int y, char c, short int color){
     	case 'D': letter = D_array; break;
 		case 'C': letter = C_array; break;
 		case 'B': letter = B_array; break;
+		case 'J': letter = J_array; break;
+		case 'V': letter = V_array; break;
 		case '0': letter = zero_array; break;
 		case '1': letter = one_array; break;
 		case '2': letter = two_array; break;
@@ -825,9 +835,9 @@ void drawLetter(int x, int y, char c, short int color){
 		case '!': letter = exclamation_array; break;
 		case '<': letter = less_than_array; break;
     	case '>': letter = greater_than_array; break;
-		case 'Z': letter = right_arrow_array; break;
-		case 'X': letter = left_arrow_array; break;
-		case 'V': letter = down_arrow_array; break;
+		case '@': letter = right_arrow_array; break;
+		case '#': letter = left_arrow_array; break;
+		case '$': letter = down_arrow_array; break;
 			
 		case 't': letter = T_wide; break;
         case 'o': letter = O_wide; break;
